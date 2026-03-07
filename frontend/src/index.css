@@ -3,6 +3,19 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+@font-face {
+  font-family: japan;
+  src: url("../public/Fonts/Japan-Daisuki.otf");
+}
+@font-face {
+  font-family: archa;
+  src: url("../public/Fonts/Archa-Manic-Demo-Thin.ttf");
+}
+@font-face {
+  font-family: sublem;
+  src: url("../public/Fonts/Sublem.ttf");
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
