@@ -13,6 +13,7 @@ import PersonDetails from './person/pages/PersonDetails'
 import Favorites from './profile/pages/Favorites'
 import Watchlist from './profile/pages/Watchlist'
 import History from './profile/pages/History'
+import NotFoundScreen from './pages/NotFoundScreen'
 
 // Admin
 import AdminGuard from './admin/components/AdminGuard'
@@ -103,5 +104,9 @@ export const router = createBrowserRouter([
     {
         path:"/register",
         element:<Register/>
+    },
+    {
+        path: "*",
+        element: <NotFoundScreen />
     }
 ])

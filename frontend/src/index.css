@@ -16,7 +16,7 @@
   src: url("../public/Fonts/Sublem.ttf");
 }
 #root{
-
+user-select: none;
 }
 @custom-variant dark (&:is(.dark *));
 
