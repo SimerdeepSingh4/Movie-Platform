@@ -5,10 +5,11 @@ const userModel = require("../models/user.model");
 
 async function addFavorite(req, res) {
     try {
-        const { tmdbId, mediaType, source } = req.body;
+        const { tmdbId, _id_custom, mediaType, source } = req.body;
         const favorite = await favoriteModel.create({
             user: req.user.id,
             tmdbId,
+            _id_custom,
             mediaType,
             source
         });
@@ -81,10 +82,11 @@ async function removeFavorite(req, res) {
 
 async function addWatchHistory(req, res) {
     try {
-        const { tmdbId, mediaType, action, source } = req.body;
+        const { tmdbId, _id_custom, mediaType, action, source } = req.body;
         const entry = await watchHistoryModel.create({
             user: req.user.id,
             tmdbId,
+            _id_custom,
             mediaType,
             action,
             source
@@ -107,6 +109,7 @@ async function getWatchHistory(req, res) {
         const limit = Math.min(Number(req.query.limit) || 20, 100);
         const history = await watchHistoryModel
             .find({ user: req.user.id })
+            .populate("_id_custom")
             .sort({ createdAt: -1 })
             .limit(limit);
 

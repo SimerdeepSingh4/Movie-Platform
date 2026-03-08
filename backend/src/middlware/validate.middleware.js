@@ -32,9 +32,9 @@ function validateMoviePayload(req, res, next) {
 }
 
 function validateFavoritePayload(req, res, next) {
-    const { tmdbId, mediaType } = req.body;
-    if (tmdbId === undefined || !mediaType) {
-        return badRequest(res, "tmdbId and mediaType are required");
+    const { tmdbId, _id_custom, mediaType } = req.body;
+    if ((tmdbId === undefined && _id_custom === undefined) || !mediaType) {
+        return badRequest(res, "Either tmdbId or _id_custom, and mediaType are required");
     }
     if (!["movie", "tv", "person"].includes(mediaType)) {
         return badRequest(res, "mediaType must be one of: movie, tv, person");
@@ -43,9 +43,9 @@ function validateFavoritePayload(req, res, next) {
 }
 
 function validateHistoryPayload(req, res, next) {
-    const { tmdbId, mediaType, action } = req.body;
-    if (tmdbId === undefined || !mediaType) {
-        return badRequest(res, "tmdbId and mediaType are required");
+    const { tmdbId, _id_custom, mediaType, action } = req.body;
+    if ((tmdbId === undefined && _id_custom === undefined) || !mediaType) {
+        return badRequest(res, "Either tmdbId or _id_custom, and mediaType are required");
     }
     if (action && !["opened", "watchedTrailer"].includes(action)) {
         return badRequest(res, "action must be one of: opened, watchedTrailer");
@@ -55,8 +55,8 @@ function validateHistoryPayload(req, res, next) {
 
 function validateFavoriteParams(req, res, next) {
     const { tmdbId, mediaType } = req.params;
-    if (!tmdbId || Number.isNaN(Number(tmdbId))) {
-        return badRequest(res, "tmdbId param must be a valid number");
+    if (!tmdbId) {
+        return badRequest(res, "id param is required");
     }
     if (!["movie", "tv", "person"].includes(mediaType)) {
         return badRequest(res, "mediaType param must be one of: movie, tv, person");

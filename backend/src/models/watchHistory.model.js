@@ -9,7 +9,10 @@ const watchHistorySchema = new mongoose.Schema(
         },
         tmdbId: {
             type: Number,
-            required: true,
+        },
+        _id_custom: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "movies"
         },
         mediaType: {
             type: String,

@@ -223,7 +223,7 @@ const MovieDetails = () => {
   return (
     <div className="min-h-screen pb-16">
       {/* Hero Banner Area */}
-      <div className="relative h-[60vh] md:h-[75vh] w-full flex items-end justify-start overflow-hidden pt-16 mt-[-64px]">
+      <div className="relative min-h-[60vh] md:min-h-[75vh] w-full flex items-end justify-start overflow-hidden pt-32 mt-[-64px]">
         <div className="absolute inset-0 z-0">
           <img
             src={backdropUrl}

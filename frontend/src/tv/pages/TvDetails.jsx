@@ -183,7 +183,7 @@ const TvDetails = () => {
 
   return (
     <div className="min-h-screen pb-16">
-      <div className="relative h-[60vh] md:h-[75vh] w-full flex items-end justify-start overflow-hidden pt-16 mt-[-64px]">
+      <div className="relative min-h-[60vh] md:min-h-[75vh] w-full flex items-end justify-start overflow-hidden pt-32 mt-[-64px]">
         <div className="absolute inset-0 z-0">
           <img src={backdropUrl} alt={show.name} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent z-10" />
