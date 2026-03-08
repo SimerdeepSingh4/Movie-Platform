@@ -34,7 +34,7 @@ const Home = () => {
         dispatch(setMovies({ category: 'topRated', data: topRatedRes.data.results }));
         dispatch(setMovies({ category: 'exclusive', data: exclusiveRes.data.movies }));
       } catch (err) {
-        dispatch(setError('Failed to fetch movies. Check your API key.'));
+        dispatch(setError('Failed to fetch movies.'));
         console.error("Fetch Error:", err);
       } finally {
         dispatch(setLoading(false));
