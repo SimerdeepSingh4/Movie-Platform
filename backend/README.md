@@ -1,157 +1,100 @@
-# Movie Platform Backend
+# Movie Platform Backend API
 
-This is the backend server for the Full Stack Movie Platform. It is a robust RESTful API built with **Node.js** and **Express**, designed to handle user authentication, manage movie data (via TMDB API), and store user preferences like favorites and watch history in **MongoDB**.
+This directory contains the backend server code for the Movie Platform. It is a robust RESTful API built with **Node.js** and **Express**, responsible for database interactions, user authentication, external API communication (TMDB API), and secure data operations.
 
-## 🚀 Features
+## 🚀 Core Backend Features
 
-### Core Functionality
-- **User Authentication**: Secure Sign Up, Log In, and Log Out using **JWT (JSON Web Tokens)**.
-- **Movie Data Integration**: Acts as a proxy and aggregator for the **TMDB API** to fetch Trending, Popular, Movies, TV Shows, and detailed metadata.
-- **Search**: Real-time search capabilities for movies, TV shows, and actors.
-- **Media Handling**: Integration with **ImageKit** for managing image uploads (e.g., user avatars or custom movie posters).
-- **Performance**: Implements caching strategies using **Redis** (via `ioredis`) to optimize API response times and reduce external API calls.
-
-### User Features
-- **Favorites List**: Users can add or remove movies from their personal favorites list.
-- **Watch History**: Automatically tracks movies and trailers watched by the user.
-- **Profile Management**: Secure management of user credentials.
-
-### Admin Dashboard
-- **Content Management**: Admin users can add, edit, or delete custom movie entries.
-- **User Management**: Admins can view user lists and ban/delete users.
+- **Authentication System**: Secure user registration, login, and logout handling using **JWT (JSON Web Tokens)** and HTTP-only cookies. Passwords are encrypted utilizing `bcrypt.js`. Redis is utilized for JWT token blacklisting to instantly invalidate active tokens upon logout.
+- **Database Management**: Utilizes **Mongoose** to strictly model business data (Users, custom admin Movies, Profiles, etc.) in **MongoDB**.
+- **External API Proxy & Caching**: Acts as an intermediary middleware to safely fetch data from the **TMDB API** without exposing API keys to the client. Uses **Redis** (`ioredis`) to deeply cache requests and improve platform performance dramatically.
+- **Media Uploads**: Interacts with the **ImageKit** SDK allowing admins to upload custom avatars or custom movie posters dynamically to CDN storage.
+- **Role-Based Access Control (RBAC)**: Enforces Admin-only routing and endpoints for elevated privileges (e.g., banning users or uploading manual content).
 
 ---
 
-## 🛠️ Tech Stack & Key Packages
+## 📂 Backend Folder Structure
 
-The backend is built using the following key technologies and libraries:
+The code is strictly organized in the `backend/src/` (or similar) files based on standard MVC-like architecture principles:
+
+```text
+backend/
+├── config/         # Database connection setup, Redis configuration
+├── controllers/    # Route controllers handling the core business logic
+├── middleware/     # Custom Express middlewares (Auth guards, Admin guards)
+├── models/         # Mongoose Data Schemas (User, Movie, Favorite, etc.)
+├── routes/         # Express router definitions mapping paths to controllers
+├── scripts/        # Utility scripts (e.g., Admin user seeder)
+├── server.js/app.js# Main Express server configuration and entry points
+├── .env            # Environment Variables (ignored by Git)
+└── package.json    # Backend specific Node.js dependencies
+```
+
+---
+
+## 🛠️ Backend Technologies & Packages
+
+The backend is built utilizing the following core libraries:
 
 | Package | Description |
 | :--- | :--- |
-| **Express.js** | Fast, unopinionated, minimalist web framework for Node.js. |
-| **Mongoose** | Elegant MongoDB object modeling for Node.js. |
-| **JWT (jsonwebtoken)** | Used for securely transmitting information between parties as a JSON object. |
-| **Bcrypt.js** | Library to help hash passwords before saving them to the database. |
-| **Axios** | Promise-based HTTP client for making requests to the TMDB API. |
-| **ImageKit** | SDK for image optimization and transformation. |
-| **IORedis** | A robust, performance-focused Redis client for Node.js used for caching. |
-| **Dotenv** | Zero-dependency module that loads environment variables from a `.env` file. |
-| **Cors** | Middleware to enable Cross-Origin Resource Sharing. |
-| **Cookie-Parser** | Parse Cookie header and populate `req.cookies`. |
+| **Express.js** | Core web framework to set up REST routes and middleware. |
+| **Mongoose** | Elegant MongoDB object modeling and schema validation. |
+| **JWT (jsonwebtoken)** | Signs and verifies user identity tokens. |
+| **Bcrypt.js** | Hashes passwords securely before saving to DB. |
+| **Axios** | Makes HTTP requests to external services like TMDB. |
+| **ImageKit** | SDK used to upload and deliver images via their CDN. |
+| **IORedis** | Robust, performance-focused Redis client for caching API responses & token blacklisting. |
+| **Dotenv** | Injects `.env` secrets into Node's `process.env`. |
+| **Cors & Cookie-Parser** | Configured for safe Cross-Origin requests and cookie parsing. |
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Dependencies Setup and Running Locally
 
 ### Prerequisites
-- **Node.js** (v14+ recommended)
-- **MongoDB** (Local or Atlas URI)
-- **Redis** (Local or Cloud instance)
+- **Node.js**
+- **MongoDB** (Local instance or external Atlas cluster)
+- **Redis** (Local instance or cache store)
 
 ### Steps
 
-1. **Clone the repository** (if you haven't already) and navigate to the backend folder:
-   ```bash
-   cd backend
-   ```
-
-2. **Install Dependencies**:
+1. **Install Backend Dependencies**:
+   Navigate to the `backend` folder and run:
    ```bash
    npm install
    ```
 
-3. **Environment Configuration**:
-   Create a `.env` file in the root of the `backend` directory and add the following variables:
-
+2. **Environment Configuration**:
+   Create a `.env` file referencing any `.example` available. You will critically need:
    ```env
    PORT=5000
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_super_secret_jwt_key
    NODE_ENV=development
-
-   # Redis Configuration (Optional but recommended)
+   
+   # Optional but required for caching features
    REDIS_URL=redis://localhost:6379
    ```
 
-4. **Run the Server**:
+3. **Start the Express Server**:
    
-   For development (uses `nodemon` for hot-reloading):
+   To start with `nodemon` for active development re-compiling:
    ```bash
    npm run dev
    ```
 
-   For production:
-   ```bash
-   npm start
-   ```
-
-5. **Seed Admin User**:
-   To create an initial admin account, run the seed script:
+4. **Seed the Initial Data** (Optional):
+   Run the seeding script to populate an administrative user:
    ```bash
    npm run seed:admin
    ```
 
 ---
 
-## 📡 API Endpoints Overview
+## 📡 Key API Routes
 
-### Authentication (`/api/v1/auth`)
-- `POST /signup`: Register a new user.
-- `POST /login`: Authenticate user and return token.
-- `POST /logout`: Clear auth cookies/tokens.
-
-### Movies & TV (`/api/v1/movie`, `/api/v1/tv`)
-- `GET /trending`: Get trending content.
-- `GET /:id/details`: Get detailed info for a specific movie/show.
-- `GET /:id/trailers`: Get YouTube trailer links.
-- `GET /:id/similar`: Get similar content recommendations.
-- `GET /:category`: Get movies by category (popular, top_rated, etc.).
-
-### Search (`/api/v1/search`)
-- `GET /:query`: Search for movies, TV shows, or people.
-
-### User (`/api/v1/user`)
-- `GET /profile`: Get current user profile.
-- `POST /favorites`: Add to favorites.
-- `DELETE /favorites`: Remove from favorites.
-- `GET /history`: Get watch history.
-
-### Admin (`/api/v1/admin`)
-- `POST /movie`: Add a new movie manually.
-- `PUT /movie/:id`: Update movie details.
-- `DELETE /movie/:id`: Delete a movie.
-- `GET /users`: List all users.
-- `DELETE /users/:id`: Ban/Delete a user.
-
----
-
-## 📂 Folder Structure
-
-```text
-backend/
-├── config/         # Database and external service configuration
-├── controllers/    # Logic for handling API requests
-├── middleware/     # Auth checks, error handling, validation
-├── models/         # Mongoose schemas (User, Movie, etc.)
-├── routes/         # API route definitions
-├── services/       # Business logic (TMDB service, ImageKit service)
-├── utils/          # Helper functions (token generation, error classes)
-├── scripts/        # Database seeding scripts
-├── server.js       # Entry point of the application
-└── package.json    # Dependencies and scripts
-```
-
-## 🛡️ Security Practices
-
-- **Password Hashing**: All user passwords are hashed using `bcryptjs` before storage.
-- **JWT Authentication**: Stateless authentication using JSON Web Tokens.
-- **Environment Variables**: Sensitive keys are stored in `.env` and not committed to version control.
-- **CORS**: Configured to allow requests only from the frontend application.
-
-## 🤝 Contributing
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+- **`/api/auth`**: Endpoints for signing up, logging in, and logging out.
+- **`/api/user`**: Endpoints for interacting with the logged-in user's profile, favorites list, and watch history.
+- **`/api/movies`** and **`/api/tv`**: GET endpoints for aggregating categories (Trending, Popular, Details).
+- **`/api/search`**: Search aggregators.
+- **`/api/admin`**: Protected POST/PUT/DELETE routes strictly for content and user management.
