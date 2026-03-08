@@ -38,7 +38,7 @@ const Register = () => {
   useGSAP(() => {
     gsap.to(".move", {
       yPercent: -310,
-      duration: 10,
+      duration: 15,
       repeat: -1,
       ease: "none",
     });
@@ -47,7 +47,7 @@ const Register = () => {
     gsap.to(".move2", {
       yPercent: 200,
       repeat: -1,
-      duration: 10,
+      duration: 15,
       ease: "none",
     });
   })
