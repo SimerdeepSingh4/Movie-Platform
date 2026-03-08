@@ -32,21 +32,39 @@ const History = () => {
         const res = await api.get('/user/history');
         const historyData = res.data.history || [];
 
-        // 2. Hydrate each history item with TMDB data
+        // 2. Hydrate each history item with TMDB data or extract populated custom data
         const hydratedHistory = await Promise.all(
           historyData.map(async (item) => {
             try {
+              // Handle internal/custom movies
+              if (item.source === 'internal' || item._id_custom) {
+                const localMovie = item._id_custom;
+                if (!localMovie) return null; // Defensive check
+                
+                return {
+                  id: localMovie._id,
+                  title: localMovie.title,
+                  name: localMovie.title,
+                  poster_path: localMovie.posterUrl,
+                  vote_average: localMovie.rating || 0,
+                  mediaType: item.mediaType,
+                  action: item.action,
+                  watchedAt: new Date(item.createdAt).toLocaleDateString()
+                };
+              }
+
+              // Handle TMDB movies
               const tmdbRes = await axios.get(
                 `${BASE_URL}/${item.mediaType}/${item.tmdbId}?api_key=${TMDB_API_KEY}`
               );
               return {
                 ...tmdbRes.data,
                 mediaType: item.mediaType,
-                action: item.action, // e.g., 'watchedTrailer', 'opened'
+                action: item.action,
                 watchedAt: new Date(item.createdAt).toLocaleDateString()
               };
             } catch (err) {
-              console.error(`Failed to fetch TMDB data for ${item.tmdbId}`, err);
+              console.error(`Failed to fetch TMDB data for ${item.tmdbId || item._id_custom?._id}`, err);
               return null;
             }
           })

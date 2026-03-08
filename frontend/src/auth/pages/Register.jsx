@@ -36,20 +36,25 @@ const Register = () => {
   };
 
   useGSAP(() => {
-    gsap.to(".move", {
-      yPercent: -310,
-      duration: 15,
-      repeat: -1,
-      ease: "none",
-    });
+    gsap.fromTo(".move",
+      { yPercent: 0 },
+      {
+        yPercent: -50,
+        duration: 20,
+        repeat: -1,
+        ease: "none",
+      }
+    );
 
-
-    gsap.to(".move2", {
-      yPercent: 200,
-      repeat: -1,
-      duration: 15,
-      ease: "none",
-    });
+    gsap.fromTo(".move2",
+      { yPercent: -50 },
+      {
+        yPercent: 0,
+        repeat: -1,
+       duration: 20,
+        ease: "none",
+      }
+    );
   })
   const posters = [
     "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
@@ -79,16 +84,16 @@ const Register = () => {
     <div className="relative min-h-screen bg-background text-foreground flex overflow-hidden">
 
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/30 z-0" />
-      
+
       <div className="absolute left-0 top-0 w-[45%] lg:w-[50%] h-screen lg:flex hidden overflow-hidden gap-4 p-4 z-10 opacity-70">
-        <div className="move flex flex-col gap-4 w-1/3">
+        <div className="move flex flex-col gap-4 w-1/3 h-max pb-4">
           {[...posters, ...posters].map((src, i) => (
             <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
               <img className="w-full h-full object-cover" src={src} />
             </div>
           ))}
         </div>
-        <div className="move2 flex flex-col gap-4 w-1/3 mt-[-50%] -translate-y-[280%]">
+        <div className="move2 flex flex-col gap-4 w-1/3 h-max pb-4">
 
           {[...posters2, ...posters2].map((src, i) => (
             <div key={i} className="marque2 shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3] ">
@@ -97,12 +102,12 @@ const Register = () => {
           ))}
 
         </div>
-        <div className="move flex flex-col gap-4 w-1/3">
+        <div className="move flex flex-col gap-4 w-1/3 h-max pb-4">
           {[...posters3, ...posters3].map((src, i) => (
-    <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
-      <img className="w-full h-full object-cover" src={src} />
-    </div>
-  ))}
+            <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
+              <img className="w-full h-full object-cover" src={src} />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -147,12 +152,12 @@ const Register = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  id="password" 
-                  type="password" 
-                  required 
-                  placeholder="••••••••" 
+                <Input
+                  onChange={(e) => setPassword(e.target.value)}
+                  id="password"
+                  type="password"
+                  required
+                  placeholder="••••••••"
                   className="bg-background/50 focus:bg-background transition-colors"
                 />
               </div>

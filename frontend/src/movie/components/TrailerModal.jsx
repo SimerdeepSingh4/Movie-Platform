@@ -18,10 +18,13 @@ const TrailerModal = ({ isOpen, onClose, videoId, movieId }) => {
     const trackWatchHistory = async () => {
       if (isOpen && videoId && movieId && !hasTracked) {
         try {
+          const isMongoId = String(movieId).length > 10;
           await api.post('/user/history', {
-            tmdbId: movieId,
+            tmdbId: isMongoId ? undefined : Number(movieId),
+            _id_custom: isMongoId ? movieId : undefined,
             mediaType: 'movie',
-            action: 'watchedTrailer'
+            action: 'watchedTrailer',
+            source: isMongoId ? 'internal' : 'tmdb'
           });
           setHasTracked(true);
           console.log('Tracked trailer watch history for movie:', movieId);
