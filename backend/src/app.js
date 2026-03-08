@@ -23,6 +23,11 @@ app.use('/api/user', userRouter)
 app.use('/api/movies', movieRouter)
 app.use('/api/admin', adminRouter)
 
+// Health Check Endpoint for Monitors
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK', message: 'Server is running normally' });
+});
+
 // Serve frontend build
 const frontendDistPath = path.join(__dirname, '../public');
 app.use(express.static(frontendDistPath));
