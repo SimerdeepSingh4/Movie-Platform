@@ -59,6 +59,26 @@ async function getMovies(req, res) {
         });
     }
 }
+
+async function getMovieById(req, res) {
+    try {
+        const movie = await movieModel.findById(req.params.id).populate("createdBy", "username email role");
+        if (!movie) {
+            return res.status(404).json({
+                message: "Movie not found"
+            });
+        }
+        return res.status(200).json({
+            message: "Movie fetched successfully",
+            movie
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Failed to fetch movie",
+            error: error.message
+        });
+    }
+}
 async function deleteMovies(req, res) {
     try {
         const movie = await movieModel.findByIdAndDelete(req.params.id);
@@ -122,6 +142,7 @@ async function updateMovies(req, res) {
 module.exports = {
     addMovie,
     getMovies,
+    getMovieById,
     deleteMovies,
     updateMovies
 }

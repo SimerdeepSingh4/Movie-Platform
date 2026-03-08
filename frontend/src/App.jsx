@@ -1,9 +1,14 @@
 import React from 'react'
 import { RouterProvider } from "react-router"
 import { router } from "./app.routes"
+import { Toaster } from "@/components/ui/sonner"
+
 const App = () => {
   return (
-    <RouterProvider router={router} />
+    <>
+      <RouterProvider router={router} />
+      <Toaster />
+    </>
   )
 }
 

@@ -10,7 +10,7 @@ const Layout = () => {
         <Outlet />
       </main>
       <footer className="py-6 border-t mt-auto text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} CineVault. All rights reserved.
+        &copy; {new Date().getFullYear()} CINEBASE. All rights reserved.
       </footer>
     </div>
   );

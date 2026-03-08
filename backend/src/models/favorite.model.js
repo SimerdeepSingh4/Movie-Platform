@@ -9,7 +9,10 @@ const favoriteSchema = new mongoose.Schema(
         },
         tmdbId: {
             type: Number,
-            required: true,
+        },
+        _id_custom: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "movies"
         },
         mediaType: {
             type: String,
@@ -18,14 +21,14 @@ const favoriteSchema = new mongoose.Schema(
         },
         source: {
             type: String,
-            enum: ["tmdb", "custom"],
+            enum: ["tmdb", "internal", "custom"],
             default: "tmdb",
         },
     },
     { timestamps: true }
 );
 
-favoriteSchema.index({ user: 1, tmdbId: 1, mediaType: 1 }, { unique: true });
+favoriteSchema.index({ user: 1, tmdbId: 1, _id_custom: 1, mediaType: 1 }, { unique: true });
 favoriteSchema.index({ user: 1, createdAt: -1 });
 
 const favoriteModel = mongoose.model("favorites", favoriteSchema);

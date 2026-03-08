@@ -1,5 +1,5 @@
-import React from 'react'
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -14,15 +14,21 @@ import { Input } from "@/components/ui/input"
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { Label } from "@/components/ui/label";
-import logo from "../../assets/favicon/favicon.svg"
-import { useState } from "react";
+import logo from "../../../public/favicon.svg"
 import { useAuth } from "../hooks/useAuth";
 
 const Register = () => {
-  const { handleRegister } = useAuth();
+  const navigate = useNavigate();
+  const { handleRegister, user } = useAuth();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      navigate(user.role === 'admin' ? '/admin' : '/');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -30,46 +36,73 @@ const Register = () => {
   };
 
   useGSAP(() => {
-    gsap.to(".marque", {
-      yPercent: -100,
-      duration: 3,
+    gsap.to(".move", {
+      yPercent: -310,
+      duration: 10,
       repeat: -1,
       ease: "none",
     });
 
 
-    gsap.to(".marque2", {
+    gsap.to(".move2", {
+      yPercent: 200,
       repeat: -1,
-      yPercent: 100,
-      duration: 3,
+      duration: 10,
       ease: "none",
     });
   })
+  const posters = [
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC19.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC9.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC18.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC4.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg"
+  ];
+  const posters2 = [
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC14.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC7.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC28.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC13.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC23.jpg"
+  ];
+  const posters3 = [
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC18.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC3.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC22.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
+    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC17.jpg"
+  ];
   return (
     <div className="relative min-h-screen bg-background text-foreground flex overflow-hidden">
 
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/30 z-0" /> 
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/30 z-0" />
+      
       <div className="absolute left-0 top-0 w-[45%] lg:w-[50%] h-screen lg:flex hidden overflow-hidden gap-4 p-4 z-10 opacity-70">
         <div className="move flex flex-col gap-4 w-1/3">
-          {[...Array(6)].map((_, i) => (
-            <div key={`m1-${i}`} className="marque shrink-0 flex items-center justify-center rounded-xl overflow-hidden shadow-2xl">
-              <img className="w-full h-auto object-cover" src="https://images.unsplash.com/photo-1772678595035-4ff18bac6d93?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="" />
+          {[...posters, ...posters].map((src, i) => (
+            <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
+              <img className="w-full h-full object-cover" src={src} />
             </div>
           ))}
         </div>
-        <div className="move2 flex flex-col gap-4 w-1/3 mt-[-50%]">
-          {[...Array(6)].map((_, i) => (
-            <div key={`m2-${i}`} className="marque2 shrink-0 flex items-center justify-center rounded-xl overflow-hidden shadow-2xl -translate-y-full">
-              <img className="w-full h-auto object-cover" src="https://images.unsplash.com/photo-1772678595035-4ff18bac6d93?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="" />
+        <div className="move2 flex flex-col gap-4 w-1/3 mt-[-50%] -translate-y-[280%]">
+
+          {[...posters2, ...posters2].map((src, i) => (
+            <div key={i} className="marque2 shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3] ">
+              <img className="w-full h-full object-cover" src={src} />
             </div>
           ))}
+
         </div>
         <div className="move flex flex-col gap-4 w-1/3">
-          {[...Array(6)].map((_, i) => (
-            <div key={`m3-${i}`} className="marque shrink-0 flex items-center justify-center rounded-xl overflow-hidden shadow-2xl">
-              <img className="w-full h-auto object-cover" src="https://images.unsplash.com/photo-1772678595035-4ff18bac6d93?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="" />
-            </div>
-          ))}
+          {[...posters3, ...posters3].map((src, i) => (
+    <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
+      <img className="w-full h-full object-cover" src={src} />
+    </div>
+  ))}
         </div>
       </div>
 

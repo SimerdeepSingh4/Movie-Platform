@@ -2,10 +2,12 @@ import React, { useRef } from 'react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import MovieCard from './MovieCard';
 
-const MovieRow = ({ title, movies = [] }) => {
+const MovieRow = ({ title, movies = [], explorePath = null }) => {
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -21,12 +23,18 @@ const MovieRow = ({ title, movies = [] }) => {
   if (!movies || movies.length === 0) return null;
 
   return (
-    <div className="py-6 container mx-auto px-4 relative group">
-      <div className="flex justify-between items-end mb-4">
+    <div className="py-6 relative group w-full overflow-hidden">
+      <div className="flex justify-between items-end mb-4 px-4">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2>
-        <Button variant="link" className="text-muted-foreground hover:text-primary p-0">
-          View All <ChevronRight className="h-4 w-4 ml-1" />
-        </Button>
+        {explorePath && (
+          <Button 
+            variant="link" 
+            className="text-muted-foreground hover:text-primary p-0"
+            onClick={() => navigate(explorePath)}
+          >
+            View All <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        )}
       </div>
       
       {/* Custom Navigation Buttons visible on hover */}
@@ -55,12 +63,10 @@ const MovieRow = ({ title, movies = [] }) => {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {movies.map((movie, index) => (
-          <div key={movie.id || index} className="snap-start shrink-0">
+          <div key={`${movie.id || movie._id}-${index}`} className="snap-start shrink-0">
             <MovieCard 
-              id={movie.id} 
-              title={movie.title || movie.name} 
-              poster_path={movie.poster_path} 
-              rating={movie.vote_average}
+              {...movie} 
+              title={movie.title || movie.name}
             />
           </div>
         ))}

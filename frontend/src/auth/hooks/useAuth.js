@@ -2,6 +2,7 @@ import { getMe, login, logout, register } from "../services/auth.api";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setError, setUser, setInitialized, clearAuth } from "../../store/authSlice";
+import { toast } from "sonner";
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -24,10 +25,12 @@ export const useAuth = () => {
       if (nextUser) {
         localStorage.setItem("movie_user", JSON.stringify(nextUser));
       }
+      toast.success("Login successful! Welcome back.");
       navigate("/");
     } catch (err) {
       const message = err?.response?.data?.message || "Login failed";
       dispatch(setError(message));
+      toast.error(message);
     } finally {
       dispatch(setLoading(false));
     }
@@ -46,10 +49,12 @@ export const useAuth = () => {
       if (nextUser) {
         localStorage.setItem("movie_user", JSON.stringify(nextUser));
       }
+      toast.success("Account created successfully!");
       navigate("/");
     } catch (err) {
       const message = err?.response?.data?.message || "Registration failed";
       dispatch(setError(message));
+      toast.error(message);
     } finally {
       dispatch(setLoading(false));
     }
@@ -61,9 +66,11 @@ export const useAuth = () => {
       await logout();
       dispatch(clearAuth());
       localStorage.removeItem("movie_user");
+      toast.info("Logged out successfully");
       navigate("/login");
     } catch {
       dispatch(setError("Logout failed"));
+      toast.error("Logout failed");
     } finally {
       dispatch(setLoading(false));
     }
