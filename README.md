@@ -4,6 +4,12 @@ Welcome to the **Movie Platform**! This is a comprehensive, full-stack web appli
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge&logoColor=white)](https://movie-platform-1-3xep.onrender.com/)
 
+## Admin's credentials
+email: `admin@example.com` <br>
+pass: `admin123`
+
+##
+
 ## 🌟 Project Highlights & Good Points
 
 This application was built with modern web development practices and features several high-end user experience enhancements:
