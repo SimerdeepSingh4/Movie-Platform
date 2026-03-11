@@ -1,18 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const getInitialUser = () => {
-  try {
-    const raw = localStorage.getItem('movie_user');
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-};
-
 const initialState = {
-  user: getInitialUser(),
+  user: null,
   loading: false,
-  initialized: Boolean(getInitialUser()),
+  initialized: false,
   error: '',
 };
 
@@ -25,11 +16,6 @@ const authSlice = createSlice({
     },
     setUser: (state, action) => {
       state.user = action.payload;
-      if (action.payload) {
-        localStorage.setItem('movie_user', JSON.stringify(action.payload));
-      } else {
-        localStorage.removeItem('movie_user');
-      }
     },
     setError: (state, action) => {
       state.error = action.payload;
@@ -42,7 +28,6 @@ const authSlice = createSlice({
       state.loading = false;
       state.initialized = true;
       state.error = '';
-      localStorage.removeItem('movie_user');
     },
   },
 });

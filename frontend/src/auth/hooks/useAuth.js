@@ -21,10 +21,9 @@ export const useAuth = () => {
       dispatch(setUser(nextUser));
       dispatch(setInitialized(true));
       
-      // setUser slice already handles localStorage, but we can be explicit if needed
-      if (nextUser) {
-        localStorage.setItem("movie_user", JSON.stringify(nextUser));
-      }
+      dispatch(setUser(nextUser));
+      dispatch(setInitialized(true));
+      
       toast.success("Login successful! Welcome back.");
       navigate("/");
     } catch (err) {
@@ -45,10 +44,9 @@ export const useAuth = () => {
       
       dispatch(setUser(nextUser));
       dispatch(setInitialized(true));
+      dispatch(setUser(nextUser));
+      dispatch(setInitialized(true));
       
-      if (nextUser) {
-        localStorage.setItem("movie_user", JSON.stringify(nextUser));
-      }
       toast.success("Account created successfully!");
       navigate("/");
     } catch (err) {
@@ -64,14 +62,12 @@ export const useAuth = () => {
     dispatch(setLoading(true));
     try {
       await logout();
+    } catch (err) {
+      console.error("Backend logout failed:", err);
+    } finally {
       dispatch(clearAuth());
-      localStorage.removeItem("movie_user");
       toast.info("Logged out successfully");
       navigate("/login");
-    } catch {
-      dispatch(setError("Logout failed"));
-      toast.error("Logout failed");
-    } finally {
       dispatch(setLoading(false));
     }
   }
@@ -85,16 +81,11 @@ export const useAuth = () => {
       
       dispatch(setUser(nextUser));
       dispatch(setInitialized(true));
-      
-      if (nextUser) {
-        localStorage.setItem("movie_user", JSON.stringify(nextUser));
-      } else {
-        localStorage.removeItem("movie_user");
-      }
+      dispatch(setUser(nextUser));
+      dispatch(setInitialized(true));
     } catch {
       dispatch(setUser(null));
       dispatch(setInitialized(true));
-      localStorage.removeItem("movie_user");
     } finally {
       dispatch(setLoading(false));
     }
