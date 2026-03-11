@@ -19,16 +19,16 @@ import { useAuth } from "../hooks/useAuth";
 
 const Register = () => {
   const navigate = useNavigate();
-  const { handleRegister, user } = useAuth();
+  const { handleRegister, user, initialized } = useAuth();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    if (user) {
+    if (user && initialized) {
       navigate(user.role === 'admin' ? '/admin' : '/');
     }
-  }, [user, navigate]);
+  }, [user, initialized, navigate]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -36,6 +36,8 @@ const Register = () => {
   };
 
   useGSAP(() => {
+    if (!initialized) return;
+
     gsap.fromTo(".move",
       { yPercent: 0 },
       {
@@ -55,7 +57,7 @@ const Register = () => {
         ease: "none",
       }
     );
-  })
+  }, [initialized])
   const posters = [
     "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
     "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC19.jpg",
@@ -80,12 +82,24 @@ const Register = () => {
     "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
     "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC17.jpg"
   ];
+
+  if (!initialized) {
+    return (
+      <div className="flex justify-center items-center py-24 min-h-screen bg-background text-foreground flex overflow-hidden">
+        <div className="relative">
+          <div className="h-14 w-14 rounded-full border-4 border-muted"></div>
+          <div className="absolute inset-0 h-14 w-14 rounded-full border-4 border-transparent border-t-primary animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen bg-background text-foreground flex overflow-hidden">
 
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-muted/30 z-0" />
 
-      <div className="absolute left-0 top-0 w-[45%] lg:w-[50%] h-screen lg:flex hidden overflow-hidden gap-4 p-4 z-10 opacity-70">
+      <div className="absolute left-0 top-0 w-[45%] lg:w-[50%] h-screen lg:flex hidden overflow-hidden gap-4 p-4 z-10 ">
         <div className="move flex flex-col gap-4 w-1/3 h-max pb-4">
           {[...posters, ...posters].map((src, i) => (
             <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">

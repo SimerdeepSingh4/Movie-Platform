@@ -15,9 +15,9 @@
   font-family: sublem;
   src: url("../public/Fonts/Sublem.ttf");
 }
-#root{
+/* #root{
 user-select: none;
-}
+} */
 @custom-variant dark (&:is(.dark *));
 
 :root {
