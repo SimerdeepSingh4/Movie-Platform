@@ -99,20 +99,27 @@ const Home = () => {
             </div>
           </div>
         )}
-
         {(!loading || trending.length > 0) && !error && (
           <>
             {exclusive && exclusive.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <MovieRow title="Posted by CINEBASE Admin's" movies={exclusive} />
+                <MovieRow title={<span className="border-l-4 border-primary pl-3 text-foreground tracking-tight">Posted by CINEBASE Admin's</span>}  movies={exclusive} />
               </motion.div>
             )}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <MovieRow title=" Trending Now" movies={trending} explorePath="/movies" />
+              <MovieRow 
+                title={<span className="border-l-4 border-orange-500 pl-3 text-foreground tracking-tight">Trending Now</span>} 
+                movies={trending} 
+                explorePath="/movies" 
+              />
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-              <MovieRow title=" Top Rated Classics" movies={topRated} explorePath="/movies" />
+              <MovieRow 
+                title={<span className="border-l-4 border-blue-500 pl-3 text-foreground tracking-tight">Top Rated Classics</span>} 
+                movies={topRated} 
+                explorePath="/movies" 
+              />
             </motion.div>
 
             {/* OTT Platforms */}
@@ -120,7 +127,7 @@ const Home = () => {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
                 <MovieRow
                   title={
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-base lg:text-2xl">
                       <img
                         src="https://upload.wikimedia.org/wikipedia/commons/7/75/Netflix_icon.svg"
                         alt="Netflix"
@@ -139,7 +146,7 @@ const Home = () => {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
                 <MovieRow
                   title={
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-base lg:text-2xl ">
                       <img
                         src="https://commons.wikimedia.org/wiki/Special:FilePath/Amazon_Prime_Video_blue_logo_1.svg"
                         alt="Prime Video"
@@ -158,27 +165,47 @@ const Home = () => {
             {/* Genres */}
             {action.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}>
-                <MovieRow title=" Action Packed" movies={action} explorePath="/movies" />
+                <MovieRow 
+                  title={<span className="border-l-4 border-red-500 pl-3 text-foreground tracking-tight">Action Packed</span>} 
+                  movies={action} 
+                  explorePath="/movies" 
+                />
               </motion.div>
             )}
             {comedy.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}>
-                <MovieRow title=" Comedy Picks" movies={comedy} explorePath="/movies" />
+                <MovieRow 
+                  title={<span className="border-l-4 border-yellow-500 pl-3 text-foreground tracking-tight">Comedy Picks</span>} 
+                  movies={comedy} 
+                  explorePath="/movies" 
+                />
               </motion.div>
             )}
             {horror.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
-                <MovieRow title=" Late Night Screams" movies={horror} explorePath="/movies" />
+                <MovieRow 
+                  title={<span className="border-l-4 border-purple-500 pl-3 text-foreground tracking-tight">Late Night Screams</span>} 
+                  movies={horror} 
+                  explorePath="/movies" 
+                />
               </motion.div>
             )}
             {scifi.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3 }}>
-                <MovieRow title=" Mind-Bending Sci-Fi" movies={scifi} explorePath="/movies" />
+                <MovieRow 
+                  title={<span className="border-l-4 border-cyan-400 pl-3 text-foreground tracking-tight">Mind-Bending Sci-Fi</span>} 
+                  movies={scifi} 
+                  explorePath="/movies" 
+                />
               </motion.div>
             )}
             {anime.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.4 }}>
-                <MovieRow title=" Anime Favorites" movies={anime} explorePath="/movies" />
+                <MovieRow 
+                  title={<span className="border-l-4 border-pink-500 pl-3 text-foreground tracking-tight">Anime Favorites</span>} 
+                  movies={anime} 
+                  explorePath="/movies" 
+                />
               </motion.div>
             )}
 

@@ -102,8 +102,8 @@ const HeroSection = () => {
             className="w-full h-full object-cover scale-105"
           />
           {/* Dynamic gradient overlay that looks good in both light and dark mode */}
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/5 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/0 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/0 to-transparent z-10" />
         </motion.div>
       </AnimatePresence>
 

@@ -23,7 +23,7 @@ const MovieRow = ({ title, movies = [], explorePath = null }) => {
   if (!movies || movies.length === 0) return null;
 
   return (
-    <div className="py-6 relative group w-full overflow-hidden">
+    <div className="pl-4 py-6 relative group w-full overflow-hidden">
       <div className="flex justify-between items-end mb-4 px-4">
         <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2>
         {explorePath && (
