@@ -63,7 +63,6 @@ export const useAuth = () => {
     try {
       await logout();
     } catch (err) {
-      console.error("Backend logout failed:", err);
     } finally {
       dispatch(clearAuth());
       toast.info("Logged out successfully");

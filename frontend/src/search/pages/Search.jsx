@@ -61,7 +61,6 @@ const Search = () => {
           setLoading(false);
           return;
         } catch (err) {
-          console.error("User search error:", err);
           throw err;
         }
       }
@@ -93,7 +92,6 @@ const Search = () => {
       }
       setTotalPages(res.data.total_pages);
     } catch (err) {
-      console.error("Search fetch error:", err);
       setError("Failed to fetch results.");
     } finally {
       setLoading(false);

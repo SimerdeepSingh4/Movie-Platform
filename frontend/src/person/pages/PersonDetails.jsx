@@ -24,7 +24,6 @@ const PersonDetails = () => {
       );
       setPerson(res.data);
     } catch (err) {
-      console.error("Failed to fetch person details:", err);
       setError("Failed to load person details.");
     } finally {
       setLoading(false);

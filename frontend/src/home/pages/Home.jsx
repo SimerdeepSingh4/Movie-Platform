@@ -35,7 +35,7 @@ const Home = () => {
         dispatch(setMovies({ category: 'exclusive', data: exclusiveRes.data.movies }));
       } catch (err) {
         dispatch(setError('Failed to fetch movies.'));
-        console.error("Fetch Error:", err);
+        toast.error("Fetch Error:");
       } finally {
         dispatch(setLoading(false));
       }
@@ -71,7 +71,7 @@ const Home = () => {
         dispatch(setMovies({ category: 'scifi', data: scifiRes.data.results }));
         dispatch(setMovies({ category: 'anime', data: animeRes.data.results }));
       } catch (err) {
-        console.error("Fetch Extended Categories Error:", err);
+        toast.error("Fetch Extended Categories Error:");
       }
     };
 

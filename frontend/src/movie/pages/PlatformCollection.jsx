@@ -43,7 +43,6 @@ const PlatformCollection = () => {
       }
       setTotalPages(res.data.total_pages);
     } catch (err) {
-      console.error("Fetch platform movies error:", err);
       setError(`Failed to fetch movies for ${providerName}.`);
     } finally {
       setLoading(false);

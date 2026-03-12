@@ -64,7 +64,6 @@ const History = () => {
                 watchedAt: new Date(item.createdAt).toLocaleDateString()
               };
             } catch (err) {
-              console.error(`Failed to fetch TMDB data for ${item.tmdbId || item._id_custom?._id}`, err);
               return null;
             }
           })
@@ -72,7 +71,7 @@ const History = () => {
         
         setHistory(hydratedHistory.filter(h => h !== null));
       } catch (err) {
-        console.error("Failed to fetch history:", err);
+
         setError("Failed to load your watch history.");
       } finally {
         setLoading(false);

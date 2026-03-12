@@ -56,7 +56,6 @@ const HeroSection = () => {
         toast.error("No trailer available for this movie.");
       }
     } catch (err) {
-      console.error("Failed to fetch trailer:", err);
       toast.error("Failed to fetch the trailer at this time.");
     } finally {
       setFetchingTrailer(false);

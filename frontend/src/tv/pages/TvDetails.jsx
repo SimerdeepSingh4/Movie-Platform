@@ -36,7 +36,6 @@ const TvDetails = () => {
       );
       setShow(res.data);
     } catch (err) {
-      console.error("Failed to fetch TV details:", err);
       setError("Failed to load TV details.");
     } finally {
       setLoading(false);
@@ -51,7 +50,6 @@ const TvDetails = () => {
       const isFav = favorites.some(fav => fav.tmdbId === Number(id) && fav.mediaType === 'tv');
       setIsFavorite(isFav);
     } catch (err) {
-      console.error("Failed to check favorite status:", err);
     }
   }, [id, user, show]);
 
@@ -63,7 +61,6 @@ const TvDetails = () => {
       const isAdded = watchlist.some(item => item.tmdbId === Number(id) && item.mediaType === 'tv');
       setIsWatchlisted(isAdded);
     } catch (err) {
-      console.error("Failed to check watchlist status:", err);
     }
   }, [id, user, show]);
 
@@ -99,7 +96,6 @@ const TvDetails = () => {
         toast.success("Added to favorites");
       }
     } catch (err) {
-      console.error("Failed to toggle favorite:", err);
       toast.error("Failed to update favorites");
     } finally {
       setIsAddingFavorite(false);
@@ -124,7 +120,6 @@ const TvDetails = () => {
         toast.success("Added to watchlist");
       }
     } catch (err) {
-      console.error("Failed to toggle watchlist:", err);
       toast.error("Failed to update watchlist");
     } finally {
       setIsAddingWatchlist(false);

@@ -28,7 +28,6 @@ const AdminDashboard = () => {
           totalMovies: movies.length 
         });
       } catch (err) {
-        console.error("Failed to fetch dashboard stats", err);
       } finally {
         setLoading(false);
       }

@@ -28,7 +28,6 @@ const Movies = () => {
         const res = await axios.get(`${BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}`);
         setGenres(res.data.genres || []);
       } catch (err) {
-        console.error("Fetch genres error:", err);
       }
     };
     fetchGenres();
@@ -56,7 +55,6 @@ const Movies = () => {
       }
       setTotalPages(res.data.total_pages);
     } catch (err) {
-      console.error("Fetch movies error:", err);
       setError("Failed to fetch movies.");
     } finally {
       setLoading(false);

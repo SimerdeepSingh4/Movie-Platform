@@ -28,7 +28,6 @@ const TvShows = () => {
         const res = await axios.get(`${BASE_URL}/genre/tv/list?api_key=${TMDB_API_KEY}`);
         setGenres(res.data.genres || []);
       } catch (err) {
-        console.error("Fetch genres error:", err);
       }
     };
     fetchGenres();
@@ -55,7 +54,6 @@ const TvShows = () => {
       }
       setTotalPages(res.data.total_pages);
     } catch (err) {
-      console.error("Fetch TV shows error:", err);
       setError("Failed to fetch TV shows.");
     } finally {
       setLoading(false);

@@ -59,7 +59,6 @@ const MovieDetails = () => {
         setMovie(res.data);
       }
     } catch (err) {
-      console.error("Failed to fetch movie details:", err);
       setError("Failed to load movie details.");
     } finally {
       setLoading(false);
@@ -76,7 +75,7 @@ const MovieDetails = () => {
         : favorites.some(fav => fav.tmdbId === Number(id) && fav.mediaType === 'movie');
       setIsFavorite(isFav);
     } catch (err) {
-      console.error("Failed to check favorite status:", err);
+
     }
   }, [id, user, movie]);
 
@@ -90,7 +89,6 @@ const MovieDetails = () => {
         : watchlist.some(item => item.tmdbId === Number(id));
       setIsWatchlisted(isAdded);
     } catch (err) {
-      console.error("Failed to check watchlist status:", err);
     }
   }, [id, user, movie]);
 
@@ -127,7 +125,6 @@ const MovieDetails = () => {
         toast.success("Added to favorites");
       }
     } catch (err) {
-      console.error("Failed to toggle favorite:", err);
       toast.error("Failed to update favorites");
     } finally {
       setIsAddingFavorite(false);
@@ -152,7 +149,6 @@ const MovieDetails = () => {
         toast.success("Added to watchlist");
       }
     } catch (err) {
-      console.error("Failed to toggle watchlist:", err);
       toast.error("Failed to update watchlist");
     } finally {
       setIsAddingWatchlist(false);

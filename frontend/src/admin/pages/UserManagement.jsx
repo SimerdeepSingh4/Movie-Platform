@@ -46,7 +46,6 @@ const UserManagement = () => {
         const res = await api.get('/admin/users');
         setUsers(res.data.users || []);
       } catch (err) {
-        console.error("Failed to fetch users", err);
         setError("Failed to load user list. Please try again.");
       } finally {
         setLoading(false);
@@ -104,7 +103,6 @@ const UserManagement = () => {
       setRefreshKey(prev => prev + 1);
       toast.success(`User successfully ${action}ed`);
     } catch (err) {
-      console.error(`Failed to ${action} user:`, err);
       toast.error(`An error occurred trying to ${action} the user.`);
     }
   };

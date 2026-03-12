@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
+import { toast } from 'sonner';
 
 const TrailerModal = ({ isOpen, onClose, videoId, movieId }) => {
   const [hasTracked, setHasTracked] = useState(false);
@@ -27,9 +28,9 @@ const TrailerModal = ({ isOpen, onClose, videoId, movieId }) => {
             source: isMongoId ? 'internal' : 'tmdb'
           });
           setHasTracked(true);
-          console.log('Tracked trailer watch history for movie:', movieId);
+          toast('Tracked trailer watch history for movie:');
         } catch (error) {
-          console.error('Failed to track trailer watch history:', error);
+          toast.error('Failed to track trailer watch history:');
         }
       }
     };

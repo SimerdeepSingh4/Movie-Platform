@@ -54,7 +54,6 @@ const Watchlist = () => {
                   isInternal: false
                 };
               } catch (err) {
-                console.error(`Failed to fetch TMDB data for ${item.tmdbId}`, err);
                 return null;
               }
             }
@@ -63,7 +62,6 @@ const Watchlist = () => {
         
         setWatchlist(hydratedList.filter(f => f !== null));
       } catch (err) {
-        console.error("Failed to fetch watchlist:", err);
         setError("Failed to load your watchlist. Please try again later.");
       } finally {
         setLoading(false);

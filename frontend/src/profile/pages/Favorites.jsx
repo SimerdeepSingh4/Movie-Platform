@@ -52,7 +52,6 @@ const Favorites = () => {
                   isInternal: false
                 };
               } catch (err) {
-                console.error(`Failed to fetch TMDB data for ${fav.tmdbId}`, err);
                 return null;
               }
             }
