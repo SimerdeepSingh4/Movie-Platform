@@ -5,7 +5,7 @@ const userModel = require("../models/user.model");
 async function getUsers(req, res) {
     try {
         const users = await userModel
-            .find({ role: "user" })
+            .find({})
             .select("-password")
             .sort({ createdAt: -1 });
 
@@ -24,16 +24,16 @@ async function getUsers(req, res) {
 async function banUser(req, res) {
     try {
         const { id } = req.params;
+        if (req.user.id === id) {
+            return res.status(400).json({
+                message: "You cannot ban yourself"
+            });
+        }
         const user = await userModel.findById(id);
         if (!user) {
             return res.status(404).json({
                 message: "User not found"
             })
-        }
-        if (user.role === "admin") {
-            return res.status(400).json({
-                message: "Admin cannot be modified"
-            });
         }
         if (user.isBanned) {
             return res.status(400).json({
@@ -67,16 +67,16 @@ async function banUser(req, res) {
 async function unbanUser(req, res) {
     try {
         const { id } = req.params;
+        if (req.user.id === id) {
+            return res.status(400).json({
+                message: "You cannot unban yourself"
+            });
+        }
         const user = await userModel.findById(id);
         if (!user) {
             return res.status(404).json({
                 message: "User not found"
             })
-        }
-        if (user.role === "admin") {
-            return res.status(400).json({
-                message: "Admin cannot be modified"
-            });
         }
         if (!user.isBanned) {
             return res.status(400).json({
@@ -110,16 +110,16 @@ async function unbanUser(req, res) {
 async function deleteUser(req, res) {
     try {
         const { id } = req.params;
+        if (req.user.id === id) {
+            return res.status(400).json({
+                message: "You cannot delete yourself"
+            });
+        }
         const user = await userModel.findById(id);
         if (!user) {
             return res.status(404).json({
                 message: "User not found"
             })
-        }
-        if (user.role === "admin") {
-            return res.status(400).json({
-                message: "Admin cannot be Deleted"
-            });
         }
         await user.deleteOne();
 
@@ -135,10 +135,93 @@ async function deleteUser(req, res) {
     }
 }
 
+async function makeAdmin(req, res) {
+    try {
+        const { id } = req.params;
+        const user = await userModel.findById(id);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+        if (user.role === "admin") {
+            return res.status(400).json({
+                message: "User is already an admin"
+            });
+        }
+
+        const updatedUser = await userModel.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    role: "admin"
+                }
+            },
+            { new: true }
+        ).select("-password");
+
+        return res.status(200).json({
+            message: "User promoted to admin successfully",
+            user: updatedUser
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Failed to promote user to admin",
+            error: error.message
+        });
+    }
+}
+
+async function demoteUser(req, res) {
+    try {
+        const { id } = req.params;
+        if (req.user.id === id) {
+            return res.status(400).json({
+                message: "You cannot demote yourself"
+            });
+        }
+        const user = await userModel.findById(id);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+        if (user.role === "user") {
+            return res.status(400).json({
+                message: "User is already a standard user"
+            });
+        }
+
+        const updatedUser = await userModel.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    role: "user"
+                }
+            },
+            { new: true }
+        ).select("-password");
+
+        return res.status(200).json({
+            message: "Admin demoted to user successfully",
+            user: updatedUser
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Failed to demote user",
+            error: error.message
+        });
+    }
+}
+
 
 module.exports = {
     getUsers,
     banUser,
     unbanUser,
-    deleteUser
+    deleteUser,
+    makeAdmin,
+    demoteUser
 }

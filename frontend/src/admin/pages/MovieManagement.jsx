@@ -262,7 +262,7 @@ const MovieManagement = () => {
                               setMovieToDelete(movie);
                               setIsDeleteDialogOpen(true);
                             }} 
-                            className="cursor-pointer gap-2 text-destructive focus:bg-destructive focus:text-destructive-foreground"
+                            className="cursor-pointer gap-2 text-destructive focus:bg-destructive"
                           >
                             <Trash2 className="h-4 w-4" /> Delete Content
                           </DropdownMenuItem>

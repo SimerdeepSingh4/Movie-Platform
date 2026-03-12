@@ -8,6 +8,8 @@ const adminRoutes = express.Router();
 adminRoutes.get("/users", authUser, adminMiddleware, adminController.getUsers);
 adminRoutes.patch("/ban/:id", authUser, adminMiddleware, validateMongoIdParam("id"), adminController.banUser);
 adminRoutes.patch("/unban/:id", authUser, adminMiddleware, validateMongoIdParam("id"), adminController.unbanUser);
+adminRoutes.patch("/make-admin/:id", authUser, adminMiddleware, validateMongoIdParam("id"), adminController.makeAdmin);
+adminRoutes.patch("/demote/:id", authUser, adminMiddleware, validateMongoIdParam("id"), adminController.demoteUser);
 adminRoutes.delete("/:id", authUser, adminMiddleware, validateMongoIdParam("id"), adminController.deleteUser);
 
 module.exports = adminRoutes;

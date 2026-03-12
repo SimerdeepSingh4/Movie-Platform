@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Trash2, Ban, CheckCircle, Shield, MoreHorizontal, User as UserIcon } from 'lucide-react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user: currentUser } = useSelector((state) => state.auth);
   
   // Dialog State
   const [dialogConfig, setDialogConfig] = useState({ isOpen: false, action: null, userId: null, expectedText: '' });
@@ -62,7 +64,7 @@ const UserManagement = () => {
       isOpen: true,
       action,
       userId,
-      expectedText: action === 'ban' ? 'yes' : 'DELETE'
+      expectedText: action === 'ban' ? 'yes' : (action === 'make-admin' ? 'ADMIN' : (action === 'demote' ? 'USER' : 'DELETE'))
     });
     setConfirmText('');
   };
@@ -71,7 +73,11 @@ const UserManagement = () => {
     // Check if input matches expected text (case insensitive for 'yes', exact for 'DELETE')
     const isValid = dialogConfig.action === 'ban' 
       ? confirmText.toLowerCase() === 'yes'
-      : confirmText === 'delete' || confirmText === 'DELETE';
+      : dialogConfig.action === 'make-admin'
+        ? confirmText === 'admin' || confirmText === 'ADMIN'
+        : dialogConfig.action === 'demote'
+          ? confirmText === 'user' || confirmText === 'USER'
+          : confirmText === 'delete' || confirmText === 'DELETE';
 
     if (!isValid) {
       return toast.error("Confirmation text does not match.");
@@ -88,6 +94,10 @@ const UserManagement = () => {
         await api.patch(`/admin/unban/${userId}`);
       } else if (action === 'delete') {
         await api.delete(`/admin/${userId}`);
+      } else if (action === 'make-admin') {
+        await api.patch(`/admin/make-admin/${userId}`);
+      } else if (action === 'demote') {
+        await api.patch(`/admin/demote/${userId}`);
       }
       
       // Refresh list
@@ -109,8 +119,8 @@ const UserManagement = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">User Management</h2>
-          <p className="text-muted-foreground mt-1">View, ban, and delete registered accounts.</p>
+          <h2 className="text-3xl font-bold tracking-tight">System Management</h2>
+          <p className="text-muted-foreground mt-1">View, manage roles, ban, and delete registered accounts.</p>
         </div>
         <Button variant="outline" onClick={() => setRefreshKey(k => k + 1)}>
           Refresh List
@@ -219,15 +229,36 @@ const UserManagement = () => {
                             <DropdownMenuItem 
                               className="text-amber-500 cursor-pointer flex items-center gap-2 font-medium"
                               onClick={() => requestAction('ban', user._id)}
+                              disabled={currentUser?._id === user._id}
                             >
                               <Ban className="h-4 w-4" />
                               Ban User
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
+                          {user.role !== 'admin' ? (
+                            <DropdownMenuItem 
+                              className="text-primary cursor-pointer flex items-center gap-2 font-medium"
+                              onClick={() => requestAction('make-admin', user._id)}
+                            >
+                              <Shield className="h-4 w-4" />
+                              Promote to Admin
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem 
+                              className="text-primary cursor-pointer flex items-center gap-2 font-medium"
+                              onClick={() => requestAction('demote', user._id)}
+                              disabled={currentUser?._id === user._id}
+                            >
+                              <UserIcon className="h-4 w-4" />
+                              Demote to User
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem 
-                            className="text-destructive cursor-pointer flex items-center gap-2 font-medium focus:bg-destructive focus:text-destructive-foreground"
+                            className="text-destructive cursor-pointer flex items-center gap-2 font-medium focus:bg-destructive"
                             onClick={() => requestAction('delete', user._id)}
+                            disabled={currentUser?._id === user._id}
                           >
                             <Trash2 className="h-4 w-4" />
                             Delete Account
@@ -247,8 +278,8 @@ const UserManagement = () => {
       <Dialog open={dialogConfig.isOpen} onOpenChange={(isOpen) => setDialogConfig({ ...dialogConfig, isOpen })}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className={dialogConfig.action === 'delete' ? 'text-destructive' : 'text-amber-500'}>
-              {dialogConfig.action === 'ban' ? 'Ban User Account' : 'Permanently Delete User'}
+            <DialogTitle className={dialogConfig.action === 'delete' ? 'text-destructive' : (dialogConfig.action === 'make-admin' || dialogConfig.action === 'demote' ? 'text-primary' : 'text-amber-500')}>
+              {dialogConfig.action === 'ban' ? 'Ban User Account' : (dialogConfig.action === 'make-admin' ? 'Promote to Admin' : (dialogConfig.action === 'demote' ? 'Demote to User' : 'Permanently Delete User'))}
             </DialogTitle>
             <DialogDescription>
               This action requires confirmation. Please type <strong className="font-bold text-foreground">"{dialogConfig.expectedText}"</strong> below to confirm you want to proceed.
@@ -283,7 +314,7 @@ const UserManagement = () => {
               type="button"
               variant={dialogConfig.action === 'delete' ? 'destructive' : 'default'}
               onClick={confirmAction}
-              className={dialogConfig.action === 'ban' ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}
+              className={dialogConfig.action === 'ban' ? 'bg-amber-500 hover:bg-amber-600 text-white' : (dialogConfig.action === 'make-admin' || dialogConfig.action === 'demote' ? 'bg-primary hover:bg-primary/90 text-white' : '')}
             >
               Confirm
             </Button>
