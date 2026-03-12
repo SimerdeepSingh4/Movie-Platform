@@ -62,11 +62,11 @@ const CastRow = ({ title, cast = [] }) => {
                 <img
                   src={`https://image.tmdb.org/t/p/w276_and_h350_face${actor.profile_path}`}
                   alt={actor.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover/actor:scale-110"
                   loading="lazy"
                 />
               </div>
-              <p className="font-semibold text-sm leading-tight truncate px-1 group-hover:text-primary transition-colors">{actor.name}</p>
+              <p className="font-semibold text-sm leading-tight truncate px-1 group-hover/actor:text-primary transition-colors">{actor.name}</p>
               <p className="text-xs text-muted-foreground truncate mt-1 px-1">{actor.character}</p>
             </div>
           )
