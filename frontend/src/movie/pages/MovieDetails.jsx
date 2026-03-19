@@ -105,8 +105,24 @@ const MovieDetails = () => {
     if (movie && user) {
       checkFavoriteStatus();
       checkWatchlistStatus();
+
+      // Track watch history (viewed page)
+      const trackHistory = async () => {
+        try {
+          await api.post('/user/history', {
+            tmdbId: !movie._id ? Number(id) : undefined,
+            _id_custom: movie._id ? movie._id : undefined,
+            mediaType: movie.mediaType || 'movie',
+            action: 'opened',
+            source: movie._id ? 'internal' : 'tmdb'
+          });
+        } catch (err) {
+          console.error("Failed to track history:", err);
+        }
+      };
+      trackHistory();
     }
-  }, [movie, user, checkFavoriteStatus, checkWatchlistStatus]);
+  }, [movie, user, id, checkFavoriteStatus, checkWatchlistStatus]);
 
   const handleToggleFavorite = async () => {
     setIsAddingFavorite(true);

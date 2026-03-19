@@ -76,8 +76,23 @@ const TvDetails = () => {
     if (show && user) {
       checkFavoriteStatus();
       checkWatchlistStatus();
+
+      // Track watch history
+      const trackHistory = async () => {
+        try {
+          await api.post('/user/history', {
+            tmdbId: Number(id),
+            mediaType: 'tv',
+            action: 'opened',
+            source: 'tmdb'
+          });
+        } catch (err) {
+          console.error("Failed to track history:", err);
+        }
+      };
+      trackHistory();
     }
-  }, [show, user, checkFavoriteStatus, checkWatchlistStatus]);
+  }, [show, user, id, checkFavoriteStatus, checkWatchlistStatus]);
 
   const handleToggleFavorite = async () => {
     if (!user) { toast.error("Please login first"); return; }

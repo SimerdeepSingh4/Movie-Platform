@@ -14,6 +14,7 @@ userRoutes.delete("/favorites/:mediaType/:tmdbId", authUser, validateFavoritePar
 
 userRoutes.get("/history", authUser, userController.getWatchHistory);
 userRoutes.post("/history", authUser, validateHistoryPayload, userController.addWatchHistory);
+userRoutes.delete("/history/:mediaType/:id", authUser, userController.removeHistoryItem);
 
 userRoutes.get("/watchlist", authUser, userController.getWatchlist);
 userRoutes.post("/watchlist", authUser, userController.addWatchlist);

@@ -5,6 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import MovieRow from '../../home/components/MovieRow';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Search } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import api from '@/lib/api';
 
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -14,6 +16,7 @@ const PersonDetails = () => {
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useSelector((state) => state.auth);
 
   const fetchPersonDetails = useCallback(async () => {
     setLoading(true);
@@ -36,6 +39,25 @@ const PersonDetails = () => {
     }
     window.scrollTo(0, 0);
   }, [id, fetchPersonDetails]);
+
+  useEffect(() => {
+    if (person && user) {
+      // Track watch history
+      const trackHistory = async () => {
+        try {
+          await api.post('/user/history', {
+            tmdbId: Number(id),
+            mediaType: 'person',
+            action: 'opened',
+            source: 'tmdb'
+          });
+        } catch (err) {
+          console.error("Failed to track history:", err);
+        }
+      };
+      trackHistory();
+    }
+  }, [person, user, id]);
 
   if (loading) {
     return (

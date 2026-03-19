@@ -123,7 +123,7 @@ const Favorites = () => {
       {!loading && favorites.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
           {favorites.map((fav, index) => (
-            <div key={`${fav._id || fav.id}-${index}`} className="flex flex-col relative group">
+            <div key={`${fav._id || fav.id}-${index}`} className="flex flex-col relative group w-[150px] md:w-[200px] mx-auto">
               <MovieCard 
                 {...fav}
                 title={fav.title || fav.name} 
@@ -131,7 +131,7 @@ const Favorites = () => {
               <Button 
                 variant="destructive" 
                 size="sm"
-                className="w-full mt-3 font-semibold shadow-sm hover:shadow-md transition-all opacity-90 group-hover:opacity-100"
+                className="w-full mt-3 font-bold shadow-sm hover:shadow-md transition-all opacity-90 group-hover:opacity-100 h-9 rounded-xl"
                 onClick={(e) => {
                   e.preventDefault();
                   removeFavorite(fav);

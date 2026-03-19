@@ -22,6 +22,17 @@ This application was built with modern web development practices and features se
 
 ---
 
+## 🚀 Recent Updates
+
+We have recently upgraded CineBase with high-end cinematic features and technical polish:
+
+- **Cinematic UI Redesign**: Re-engineered the Movie and TV detail pages for a more immersive, "backdrop-first" experience. Features refined vertical accents, glassmorphic info points, and high-contrast typography.
+- **PWA Support**: CineBase is now a **Progressive Web App**. You can install it on your iOS, Android, or Desktop device for a standalone, app-like experience with offline capabilities.
+- **Intelligent Data Labels**: Future releases now show smart labels like "Coming to Netflix" or "Digital Release" based on real-time production and provider data.
+- **Navigation Polish**: Added automatic scroll-reset on page transitions and enhanced data fetching resilience using `Promise.allSettled`.
+
+---
+
 ## 🏗️ Project Architecture
 
 The project is divided into two distinct parts:

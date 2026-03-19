@@ -13,7 +13,11 @@ const MovieCard = ({ title, poster_path, posterUrl, id, _id, rating, mediaType =
   const isInternal = !!_id;
 
   const handleClick = () => {
-    navigate(`/${mediaType}/${cardId}${isInternal ? '?source=internal' : ''}`);
+    if (user) {
+      navigate(`/${mediaType}/${cardId}${isInternal ? '?source=internal' : ''}`);
+    } else {
+      navigate('/login');
+    }
   };
 
   // Use a fallback image if no poster is provided

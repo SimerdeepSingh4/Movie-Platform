@@ -83,17 +83,28 @@ async function removeFavorite(req, res) {
 async function addWatchHistory(req, res) {
     try {
         const { tmdbId, _id_custom, mediaType, action, source } = req.body;
-        const entry = await watchHistoryModel.create({
-            user: req.user.id,
-            tmdbId,
-            _id_custom,
-            mediaType,
-            action,
-            source
-        });
+        
+        const query = { user: req.user.id, mediaType };
+        if (_id_custom) {
+            query._id_custom = _id_custom;
+        } else {
+            query.tmdbId = tmdbId;
+        }
+
+        // Upsert to prevent duplicates and update timestamp
+        const entry = await watchHistoryModel.findOneAndUpdate(
+            query,
+            { 
+                $set: { 
+                    action: action || "opened", 
+                    source: source || "tmdb" 
+                } 
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
 
         return res.status(201).json({
-            message: "Watch history saved successfully",
+            message: "Watch history updated successfully",
             history: entry
         });
     } catch (error) {
@@ -110,7 +121,7 @@ async function getWatchHistory(req, res) {
         const history = await watchHistoryModel
             .find({ user: req.user.id })
             .populate("_id_custom")
-            .sort({ createdAt: -1 })
+            .sort({ updatedAt: -1 }) // Sort by most recently updated
             .limit(limit);
 
         return res.status(200).json({
@@ -120,6 +131,36 @@ async function getWatchHistory(req, res) {
     } catch (error) {
         return res.status(500).json({
             message: "Failed to fetch watch history",
+            error: error.message
+        });
+    }
+}
+
+async function removeHistoryItem(req, res) {
+    try {
+        const { mediaType, id } = req.params;
+        const query = { user: req.user.id, mediaType };
+        
+        if (id.length > 10) {
+            query._id_custom = id;
+        } else {
+            query.tmdbId = Number(id);
+        }
+
+        const deleted = await watchHistoryModel.findOneAndDelete(query);
+
+        if (!deleted) {
+            return res.status(404).json({
+                message: "History item not found"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Removed from history successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Failed to remove from history",
             error: error.message
         });
     }
@@ -229,6 +270,7 @@ module.exports = {
     removeFavorite,
     addWatchHistory,
     getWatchHistory,
+    removeHistoryItem,
     addWatchlist,
     getWatchlist,
     removeWatchlist,

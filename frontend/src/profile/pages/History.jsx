@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
-import { Clock, History as HistoryIcon, Play } from 'lucide-react';
+import { Clock, History as HistoryIcon, Play, Trash2 } from 'lucide-react';
 import MovieCard from '../../home/components/MovieCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -81,6 +82,18 @@ const History = () => {
     fetchHistory();
   }, [user, navigate]);
 
+  const removeHistoryItem = async (item) => {
+    try {
+      const idToRemove = item.id;
+      await api.delete(`/user/history/${item.mediaType || 'movie'}/${idToRemove}`);
+      setHistory(prev => prev.filter(h => h.id !== idToRemove));
+      toast.success("Removed from history");
+    } catch (err) {
+      console.error("Failed to remove history item:", err);
+      toast.error("Failed to remove from history.");
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -122,22 +135,37 @@ const History = () => {
       {!loading && history.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
           {history.map((item, index) => (
-            <div key={`${item.id}-${index}`} className="flex flex-col">
-              <MovieCard 
-                id={item.id} 
-                title={item.title || item.name} 
-                poster_path={item.poster_path} 
-                rating={item.vote_average}
-                mediaType={item.mediaType}
-              />
-              <div className="mt-2 pl-1 bg-background/50 rounded flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                {item.action === 'watchedTrailer' ? (
-                  <><Play className="h-3 w-3 text-primary" /> Watched Trailer</>
-                ) : (
-                  <><HistoryIcon className="h-3 w-3" /> Opened Details</>
-                )}
-                <span className="opacity-50">· {item.watchedAt}</span>
+            <div key={`${item.id}-${index}`} className="flex flex-col w-[150px] md:w-[200px] mx-auto group">
+              <div className="relative">
+                <MovieCard 
+                  id={item.id} 
+                  title={item.title || item.name} 
+                  poster_path={item.poster_path} 
+                  rating={item.vote_average}
+                  mediaType={item.mediaType}
+                />
               </div>
+              <div className="mt-3 p-2 bg-white/[0.03] border border-white/10 rounded-xl flex flex-col gap-1 text-[10px] md:text-xs font-bold text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  {item.action === 'watchedTrailer' ? (
+                    <><Play className="h-3 w-3 text-primary fill-primary" /> Trailer</>
+                  ) : (
+                    <><HistoryIcon className="h-3 w-3 text-primary" /> Activity</>
+                  )}
+                </div>
+                <span className="opacity-40">{item.watchedAt}</span>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="w-full mt-2 h-8 text-[10px] md:text-xs font-bold text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors border border-transparent hover:border-destructive/20"
+                onClick={(e) => {
+                  e.preventDefault();
+                  removeHistoryItem(item);
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-2" /> Remove
+              </Button>
             </div>
           ))}
         </div>

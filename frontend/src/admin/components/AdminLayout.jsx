@@ -1,10 +1,27 @@
 import React from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { LayoutDashboard, Users, LogOut, Film, Home, Search, Tv, User, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/auth/hooks/useAuth';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import logo from '../../../public/favicon.svg';
+
+const AdminUserAction = () => {
+  const { user } = useSelector((state) => state.auth);
+  if (!user) return null;
+  return (
+    <div className="flex items-center gap-3 border-l border-border pl-4 ml-2">
+      <div className="flex flex-col items-end hidden sm:flex">
+        <span className="text-xs font-bold text-foreground capitalize leading-tight">{user.username}</span>
+        <span className="text-[10px] text-muted-foreground uppercase tracking-tighter leading-tight">{user.role}</span>
+      </div>
+      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
+        <User className="h-4 w-4" />
+      </div>
+    </div>
+  );
+};
 
 const AdminLayout = () => {
   const { handleLogout } = useAuth();

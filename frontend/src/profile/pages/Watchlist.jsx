@@ -124,7 +124,7 @@ const Watchlist = () => {
       {!loading && watchlist.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
           {watchlist.map((item, index) => (
-            <div key={`${item._id || item.id}-${index}`} className="flex flex-col relative group">
+            <div key={`${item._id || item.id}-${index}`} className="flex flex-col relative group w-[150px] md:w-[200px] mx-auto">
               <MovieCard 
                 {...item}
                 title={item.title || item.name}
@@ -132,7 +132,7 @@ const Watchlist = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="w-full mt-3 font-semibold shadow-sm hover:bg-destructive hover:text-destructive-foreground transition-all"
+                className="w-full mt-3 font-bold shadow-sm hover:bg-destructive hover:text-destructive-foreground transition-all h-9 rounded-xl"
                 onClick={(e) => {
                   e.preventDefault();
                   removeEntry(item);
