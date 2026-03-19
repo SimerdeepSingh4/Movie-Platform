@@ -40,7 +40,7 @@ const History = () => {
               if (item.source === 'internal' || item._id_custom) {
                 const localMovie = item._id_custom;
                 if (!localMovie) return null; // Defensive check
-                
+
                 return {
                   id: localMovie._id,
                   title: localMovie.title,
@@ -68,7 +68,7 @@ const History = () => {
             }
           })
         );
-        
+
         setHistory(hydratedHistory.filter(h => h !== null));
       } catch (err) {
 

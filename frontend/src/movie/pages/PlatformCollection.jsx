@@ -29,9 +29,9 @@ const PlatformCollection = () => {
     setError(null);
     try {
       const endpoint = `${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&with_watch_providers=${providerId}&watch_region=IN&sort_by=popularity.desc&page=${pageNum}`;
-      
+
       const res = await axios.get(endpoint);
-      
+
       if (pageNum === 1) {
         setMovies(res.data.results);
       } else {
@@ -107,8 +107,8 @@ const PlatformCollection = () => {
             ))}
           </div>
 
-          <div 
-            ref={loadMoreRef} 
+          <div
+            ref={loadMoreRef}
             className="w-full flex justify-center py-8 mt-4"
           >
             {loading && page > 1 && (

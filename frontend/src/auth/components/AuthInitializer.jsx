@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Outlet } from 'react-router-dom';
+import ScrollToTop from '../../components/ScrollToTop';
 
 const AuthInitializer = () => {
   const { initialized, handleGetMe } = useAuth();
@@ -11,7 +12,12 @@ const AuthInitializer = () => {
     }
   }, [initialized, handleGetMe]);
 
-  return <Outlet />;
+  return (
+    <>
+      <ScrollToTop />
+      <Outlet />
+    </>
+  );
 };
 
 export default AuthInitializer;

@@ -16,7 +16,7 @@ const Search = () => {
   const navigate = useNavigate();
   const initialQuery = searchParams.get('q') || '';
   const initialTab = searchParams.get('type') || 'movie';
-  
+
   const [query, setQuery] = useState(initialQuery);
   const [activeTab, setActiveTab] = useState(initialTab);
   const [results, setResults] = useState([]);
@@ -66,7 +66,7 @@ const Search = () => {
       }
 
       if (type === 'movie') {
-        endpoint = searchQuery.trim() 
+        endpoint = searchQuery.trim()
           ? `${BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(searchQuery)}&page=${pageNum}&include_adult=false`
           : `${BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=${pageNum}`;
       } else if (type === 'tv') {
@@ -80,7 +80,7 @@ const Search = () => {
       }
 
       const res = await axios.get(endpoint);
-      
+
       if (pageNum === 1) {
         setResults(res.data.results);
       } else {
@@ -127,12 +127,12 @@ const Search = () => {
         <h1 className="text-4xl font-extrabold tracking-tight mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
           Global Search
         </h1>
-        
+
         <div className="relative group mb-8">
           <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-          <Input 
-            type="text" 
-            placeholder={`Search for ${categories.find(c => c.id === activeTab)?.label.toLowerCase()}...`} 
+          <Input
+            type="text"
+            placeholder={`Search for ${categories.find(c => c.id === activeTab)?.label.toLowerCase()}...`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-14 h-16 text-xl bg-card border-border/50 focus-visible:ring-primary shadow-2xl rounded-2xl"
@@ -145,11 +145,10 @@ const Search = () => {
             <button
               key={cat.id}
               onClick={() => setActiveTab(cat.id)}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                activeTab === cat.id
-                  ? 'bg-primary border-primary text-primary-foreground shadow-lg scale-105'
-                  : 'bg-card/50 border-border/50 text-muted-foreground hover:border-primary/50 hover:text-foreground'
-              }`}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all border ${activeTab === cat.id
+                ? 'bg-primary border-primary text-primary-foreground shadow-lg scale-105'
+                : 'bg-card/50 border-border/50 text-muted-foreground hover:border-primary/50 hover:text-foreground'
+                }`}
             >
               <cat.icon className="h-4 w-4" />
               {cat.label}
@@ -213,14 +212,14 @@ const Search = () => {
                 );
               } else if (activeTab === 'person') {
                 return (
-                  <div 
-                    key={`${item.id}-${index}`} 
+                  <div
+                    key={`${item.id}-${index}`}
                     className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all hover:shadow-xl cursor-pointer"
                     onClick={() => navigate(`/person/${item.id}`)}
                   >
                     <div className="aspect-[2/3] overflow-hidden">
-                      <img 
-                        src={item.profile_path ? `https://image.tmdb.org/t/p/w500${item.profile_path}` : 'https://ik.imagekit.io/dhyh95euj/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg'} 
+                      <img
+                        src={item.profile_path ? `https://image.tmdb.org/t/p/w500${item.profile_path}` : 'https://ik.imagekit.io/dhyh95euj/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg'}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
@@ -233,13 +232,13 @@ const Search = () => {
                 );
               } else if (activeTab === 'user') {
                 return (
-                  <div 
-                    key={`${item._id}-${index}`} 
+                  <div
+                    key={`${item._id}-${index}`}
                     className="group relative bg-card rounded-2xl p-6 border border-border/50 hover:border-primary/50 transition-all hover:shadow-xl text-center cursor-pointer"
                   >
                     <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-primary mb-4">
-                      <img 
-                        src={item.photoUrl} 
+                      <img
+                        src={item.photoUrl}
                         alt={item.username}
                         className="w-full h-full object-cover"
                       />
@@ -255,8 +254,8 @@ const Search = () => {
 
           {/* Infinite Scroll Trigger */}
           {activeTab !== 'user' && (
-            <div 
-              ref={loadMoreRef} 
+            <div
+              ref={loadMoreRef}
               className="w-full flex justify-center py-12 mt-8"
             >
               {loading && page > 1 && (

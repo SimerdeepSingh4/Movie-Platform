@@ -41,9 +41,9 @@ const Movies = () => {
       if (genreId) {
         endpoint += `&with_genres=${genreId}`;
       }
-      
+
       const res = await axios.get(endpoint);
-      
+
       if (pageNum === 1) {
         setMovies(res.data.results);
       } else {
@@ -82,16 +82,15 @@ const Movies = () => {
     <div className="container mx-auto px-4 pt-24 pb-16 min-h-screen">
       <div className="mb-8">
         <h1 className="text-4xl font-extrabold tracking-tight mb-6">Explore Movies</h1>
-        
+
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex items-center gap-2 pb-4 -mx-1 px-1">
             <button
               onClick={() => setSelectedGenre(null)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all shrink-0 border ${
-                selectedGenre === null 
-                  ? 'bg-primary border-primary text-primary-foreground shadow-md' 
-                  : 'bg-background border-border text-muted-foreground hover:border-primary hover:text-foreground'
-              }`}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all shrink-0 border ${selectedGenre === null
+                ? 'bg-primary border-primary text-primary-foreground shadow-md'
+                : 'bg-background border-border text-muted-foreground hover:border-primary hover:text-foreground'
+                }`}
             >
               All Genres
             </button>
@@ -99,11 +98,10 @@ const Movies = () => {
               <button
                 key={genre.id}
                 onClick={() => handleGenreSelect(genre.id)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all shrink-0 border ${
-                  selectedGenre === genre.id 
-                    ? 'bg-primary border-primary text-primary-foreground shadow-md' 
-                    : 'bg-background border-border text-muted-foreground hover:border-primary hover:text-foreground'
-                }`}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all shrink-0 border ${selectedGenre === genre.id
+                  ? 'bg-primary border-primary text-primary-foreground shadow-md'
+                  : 'bg-background border-border text-muted-foreground hover:border-primary hover:text-foreground'
+                  }`}
               >
                 {genre.name}
               </button>
@@ -146,8 +144,8 @@ const Movies = () => {
             ))}
           </div>
 
-          <div 
-            ref={loadMoreRef} 
+          <div
+            ref={loadMoreRef}
             className="w-full flex justify-center py-8 mt-4"
           >
             {loading && page > 1 && (

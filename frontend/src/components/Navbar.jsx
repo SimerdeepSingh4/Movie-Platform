@@ -12,7 +12,6 @@ import {
   DropdownMenuGroup
 } from "@/components/ui/dropdown-menu";
 import { Film, Search, User, LogOut, ShieldAlert, Bookmark } from 'lucide-react';
-import { ModeToggle } from './mode-toggle';
 import { useAuth } from '../auth/hooks/useAuth';
 import logo from "../../public/favicon.svg"
 
@@ -35,7 +34,6 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-3 md:space-x-4">
-          <ModeToggle />
           <Button variant="ghost" size="icon" asChild>
             <Link to="/search">
               <Search className="h-5 w-5" />

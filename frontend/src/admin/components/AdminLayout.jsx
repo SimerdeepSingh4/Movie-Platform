@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Users, LogOut, Film, Home, Search, Tv, User, Menu } from 'lucide-react';
-import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/auth/hooks/useAuth';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -135,8 +134,7 @@ const AdminLayout = () => {
              <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-foreground">
                 <Link to="/search" title="Search"><Search className="h-5 w-5" /></Link>
               </Button>
-
-            <ModeToggle />
+              <AdminUserAction />
           </div>
         </header>
 
