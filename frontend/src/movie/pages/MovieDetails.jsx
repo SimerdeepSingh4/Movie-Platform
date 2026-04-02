@@ -174,11 +174,11 @@ const MovieDetails = () => {
 
   const getUpcomingLabel = () => {
     if (!movie) return "Coming Soon";
-    
+
     // Check production companies - Very reliable for "Streaming Originals"
     const companies = movie.production_companies || [];
     const companyNames = companies.map(c => c.name.toLowerCase());
-    
+
     if (companyNames.some(n => n.includes('netflix'))) return "Coming to Netflix";
     if (companyNames.some(n => n.includes('amazon') || n.includes('prime video'))) return "Coming to Prime";
     if (companyNames.some(n => n.includes('disney'))) return "Coming to Disney+";
@@ -188,7 +188,7 @@ const MovieDetails = () => {
     // Check watch providers (Specific to India/Global)
     const providers = movie['watch/providers']?.results?.IN || movie['watch/providers']?.results?.US;
     const allProviders = [...(providers?.flatrate || []), ...(providers?.rent || []), ...(providers?.buy || [])];
-    
+
     if (allProviders.some(p => p.provider_name.toLowerCase().includes('netflix'))) return "Coming to Netflix";
     if (allProviders.some(p => p.provider_name.toLowerCase().includes('prime video'))) return "Coming to Prime";
     if (allProviders.some(p => p.provider_name.toLowerCase().includes('disney'))) return "Coming to Disney+";
@@ -196,7 +196,7 @@ const MovieDetails = () => {
     // Check release types for digital (type 4) or TV (type 6)
     const releaseDates = movie.release_dates?.results?.find(r => r.iso_3166_1 === 'IN' || r.iso_3166_1 === 'US')?.release_dates || [];
     if (releaseDates.some(d => d.type === 4 || d.type === 6)) return "Digital Release";
-    
+
     // Default for most major studio movies
     return "Coming to Theaters";
   };
@@ -232,8 +232,10 @@ const MovieDetails = () => {
   ) || movie.videos?.results?.[0]; // Fallback to first video if no trailer
 
   const backdropUrl = movie.backdrop_path
-    ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
-    : movie.posterUrl || 'https://images.unsplash.com/photo-1772678595035-4ff18bac6d93?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
+    : (trailerVideo?.key 
+        ? `https://img.youtube.com/vi/${trailerVideo.key}/maxresdefault.jpg` 
+        : (movie.posterUrl || `https://image.tmdb.org/t/p/w1280${movie.poster_path}`));
 
   const deduplicateProviders = (providers) => {
     if (!providers) return null;
@@ -281,16 +283,17 @@ const MovieDetails = () => {
         </div>
 
         {/* Central Play Button */}
-        <button
-          onClick={() => setIsTrailerOpen(true)}
-          className="relative z-20 group transition-transform hover:scale-110 active:scale-95 disabled:opacity-50"
-          disabled={!trailerVideo}
-        >
-          <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-2xl">
-            <Play className="h-8 w-8 md:h-10 md:w-10 text-white fill-white ml-1" />
-          </div>
-          <div className="absolute inset-0 rounded-full bg-white/10 animate-ping -z-10 group-hover:block hidden" />
-        </button>
+        {trailerVideo && (
+          <button
+            onClick={() => setIsTrailerOpen(true)}
+            className="relative z-20 group transition-transform hover:scale-110 active:scale-95"
+          >
+            <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-2xl">
+              <Play className="h-8 w-8 md:h-10 md:w-10 text-white fill-white ml-1" />
+            </div>
+            <div className="absolute inset-0 rounded-full bg-white/10 animate-ping -z-10 group-hover:block hidden" />
+          </button>
+        )}
 
         {/* Top-Right Info Box (Optional/Upcoming) */}
         {movie.release_date && (new Date(movie.release_date) > new Date() || ['In Production', 'Planned', 'Post Production'].includes(movie.status)) ? (
@@ -312,7 +315,7 @@ const MovieDetails = () => {
             {/* Floating Poster */}
             <div className="shrink-0 w-[120px] sm:w-[150px] md:w-[220px] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 -mt-10 md:-mt-12 uppercase group relative">
               <img
-                src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster'}
+                src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoWcWg0E8pSjBNi0TtiZsqu8uD2PAr_K11DA&s'}
                 alt={movie.title}
                 className="w-full h-auto object-cover"
               />
@@ -407,7 +410,7 @@ const MovieDetails = () => {
                     {flatrateProviders && flatrateProviders.length > 0 ? (
                       flatrateProviders.map(provider => (
                         <div key={provider.provider_id} className="group/provider relative">
-                          <img 
+                          <img
                             src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
                             alt={provider.provider_name}
                             className="h-8 w-8 md:h-9 md:w-9 rounded-xl border border-white/10 shadow-lg transition-transform hover:scale-110"

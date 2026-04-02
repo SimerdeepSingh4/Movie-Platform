@@ -33,34 +33,39 @@ const HeroSection = () => {
     }
   }, [trending, trendingTV]);
 
-  const handleWatchTrailer = async () => {
+  useEffect(() => {
+    const fetchTrailerForBackdrop = async () => {
+      if (!movie || trailerVideoId) return;
+      setFetchingTrailer(true);
+      try {
+        const mediaType = movie.mediaType || movie.media_type || 'movie';
+        const res = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=videos`);
+        const trailer = res.data.videos?.results?.find(
+          (vid) => vid.site === 'YouTube' && vid.type === 'Trailer'
+        ) || res.data.videos?.results?.[0];
+        
+        if (trailer) {
+          setTrailerVideoId(trailer.key);
+        }
+      } catch (err) {
+        console.error("Failed to fetch trailer for hero backdrop");
+      } finally {
+        setFetchingTrailer(false);
+      }
+    };
+
+    fetchTrailerForBackdrop();
+  }, [movie]);
+
+  const handleWatchTrailer = () => {
     if (!user) {
       return navigate('/login');
     }
 
     if (trailerVideoId) {
       setIsTrailerOpen(true);
-      return;
-    }
-    
-    setFetchingTrailer(true);
-    try {
-      const mediaType = movie.mediaType || movie.media_type || 'movie';
-      const res = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=videos`);
-      const trailer = res.data.videos?.results?.find(
-        (vid) => vid.site === 'YouTube' && vid.type === 'Trailer'
-      ) || res.data.videos?.results?.[0];
-      
-      if (trailer) {
-        setTrailerVideoId(trailer.key);
-        setIsTrailerOpen(true);
-      } else {
-        toast.error(`No trailer available for this ${mediaType}.`);
-      }
-    } catch (err) {
-      toast.error("Failed to fetch the trailer at this time.");
-    } finally {
-      setFetchingTrailer(false);
+    } else {
+      toast.error("No trailer available for this title.");
     }
   };
 
@@ -84,7 +89,11 @@ const HeroSection = () => {
   const title = movie.title || movie.name;
   const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
   const releaseDate = movie.release_date || movie.first_air_date || '';
-  const backdropUrl = movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : 'https://images.unsplash.com/photo-1772678595035-4ff18bac6d93?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+  const backdropUrl = movie.backdrop_path 
+    ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` 
+    : (trailerVideoId 
+        ? `https://img.youtube.com/vi/${trailerVideoId}/maxresdefault.jpg` 
+        : (movie.posterUrl || (movie.poster_path ? `https://image.tmdb.org/t/p/w1280${movie.poster_path}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoWcWg0E8pSjBNi0TtiZsqu8uD2PAr_K11DA&s')));
 
   return (
     <div className="relative h-[75vh] md:h-[85vh] w-full flex items-center justify-start overflow-hidden pt-16">

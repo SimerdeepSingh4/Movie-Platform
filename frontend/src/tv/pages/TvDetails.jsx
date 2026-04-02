@@ -194,7 +194,9 @@ const TvDetails = () => {
 
   const backdropUrl = show.backdrop_path
     ? `https://image.tmdb.org/t/p/original${show.backdrop_path}`
-    : 'https://images.unsplash.com/photo-1772678595035-4ff18bac6d93?q=80&w=687&auto=format&fit=crop';
+    : (trailerVideo?.key 
+        ? `https://img.youtube.com/vi/${trailerVideo.key}/maxresdefault.jpg` 
+        : (show.posterUrl || (show.poster_path ? `https://image.tmdb.org/t/p/w1280${show.poster_path}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoWcWg0E8pSjBNi0TtiZsqu8uD2PAr_K11DA&s')));
 
   const deduplicateProviders = (providers) => {
     if (!providers) return null;
@@ -236,16 +238,17 @@ const TvDetails = () => {
         </div>
 
         {/* Central Play Button */}
-        <button
-          onClick={() => setIsTrailerOpen(true)}
-          className="relative z-20 group transition-transform hover:scale-110 active:scale-95 disabled:opacity-50"
-          disabled={!trailerVideo}
-        >
-          <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-2xl">
-            <Play className="h-8 w-8 md:h-10 md:w-10 text-white fill-white ml-1" />
-          </div>
-          <div className="absolute inset-0 rounded-full bg-white/10 animate-ping -z-10 group-hover:block hidden" />
-        </button>
+        {trailerVideo && (
+          <button
+            onClick={() => setIsTrailerOpen(true)}
+            className="relative z-20 group transition-transform hover:scale-110 active:scale-95"
+          >
+            <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-2xl">
+              <Play className="h-8 w-8 md:h-10 md:w-10 text-white fill-white ml-1" />
+            </div>
+            <div className="absolute inset-0 rounded-full bg-white/10 animate-ping -z-10 group-hover:block hidden" />
+          </button>
+        )}
 
         {/* Top-Right Info Box (Optional/Interest) */}
         {((show.status === 'Returning Series' || show.status === 'Planned') && show.next_episode_to_air?.air_date) || 
@@ -268,7 +271,7 @@ const TvDetails = () => {
             {/* Floating Poster */}
             <div className="shrink-0 w-[120px] sm:w-[150px] md:w-[220px] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 -mt-10 md:-mt-12 uppercase">
               <img
-                src={show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster'}
+                src={show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoWcWg0E8pSjBNi0TtiZsqu8uD2PAr_K11DA&s'}
                 alt={show.name}
                 className="w-full h-auto object-cover"
               />
