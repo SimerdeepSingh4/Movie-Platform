@@ -1,0 +1,1 @@
+import{b as r}from"./index-CQ-OiM2Y.js";const t=r.create({baseURL:"/api",headers:{"Content-Type":"application/json"},withCredentials:!0});t.interceptors.request.use(e=>e,e=>Promise.reject(e));t.interceptors.response.use(e=>e,e=>(e.response&&e.response.status===401&&localStorage.removeItem("movie_user"),Promise.reject(e)));export{t as a};

@@ -135,4 +135,11 @@ user-select: none;
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform;
+  }
 }

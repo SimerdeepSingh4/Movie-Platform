@@ -1,27 +1,32 @@
-import {createBrowserRouter} from 'react-router-dom'
-import AuthInitializer from './auth/components/AuthInitializer'
-import Login from '../src/auth/pages/Login'
-import Register from '../src/auth/pages/Register'
-import Layout from './components/Layout'
-import Home from './home/pages/Home'
-import Search from './search/pages/Search'
-import MovieDetails from './movie/pages/MovieDetails'
-import Movies from './movie/pages/Movies'
-import PlatformCollection from './movie/pages/PlatformCollection'
-import TvShows from './tv/pages/TvShows'
-import TvDetails from './tv/pages/TvDetails'
-import PersonDetails from './person/pages/PersonDetails'
-import Favorites from './profile/pages/Favorites'
-import Watchlist from './profile/pages/Watchlist'
-import History from './profile/pages/History'
-import NotFoundScreen from './pages/NotFoundScreen'
+import React, { lazy } from 'react';
+import { createBrowserRouter } from 'react-router-dom';
+import AuthInitializer from './auth/components/AuthInitializer';
+import Layout from './components/Layout';
+
+// Lazy load all pages
+const Home = lazy(() => import('./home/pages/Home'));
+const Search = lazy(() => import('./search/pages/Search'));
+const MovieDetails = lazy(() => import('./movie/pages/MovieDetails'));
+const Movies = lazy(() => import('./movie/pages/Movies'));
+const PlatformCollection = lazy(() => import('./movie/pages/PlatformCollection'));
+const TvShows = lazy(() => import('./tv/pages/TvShows'));
+const TvDetails = lazy(() => import('./tv/pages/TvDetails'));
+const PersonDetails = lazy(() => import('./person/pages/PersonDetails'));
+const Favorites = lazy(() => import('./profile/pages/Favorites'));
+const Watchlist = lazy(() => import('./profile/pages/Watchlist'));
+const History = lazy(() => import('./profile/pages/History'));
+const NotFoundScreen = lazy(() => import('./pages/NotFoundScreen'));
+
+// Auth (keeping eager as they are small and entry points)
+import Login from '../src/auth/pages/Login';
+import Register from '../src/auth/pages/Register';
 
 // Admin
-import AdminGuard from './admin/components/AdminGuard'
-import AdminLayout from './admin/components/AdminLayout'
-import AdminDashboard from './admin/pages/AdminDashboard'
-import UserManagement from './admin/pages/UserManagement'
-import MovieManagement from './admin/pages/MovieManagement'
+import AdminGuard from './admin/components/AdminGuard';
+import AdminLayout from './admin/components/AdminLayout';
+const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
+const UserManagement = lazy(() => import('./admin/pages/UserManagement'));
+const MovieManagement = lazy(() => import('./admin/pages/MovieManagement'));
 
 export const router = createBrowserRouter([
     {

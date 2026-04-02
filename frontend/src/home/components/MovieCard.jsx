@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const MovieCard = ({ title, poster_path, posterUrl, id, _id, rating, mediaType, media_type }) => {
+const MovieCard = memo(({ title, poster_path, posterUrl, id, _id, rating, mediaType, media_type }) => {
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.auth.user);
 
   const cardId = id || _id;
   const isInternal = !!_id;
@@ -56,6 +56,6 @@ const MovieCard = ({ title, poster_path, posterUrl, id, _id, rating, mediaType, 
       </Card>
     </motion.div>
   );
-};
+});
 
 export default MovieCard;

@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, memo } from 'react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MovieCard from './MovieCard';
 
-const MovieRow = ({ title, movies = [], explorePath = null, mediaType }) => {
+const MovieRow = memo(({ title, movies = [], explorePath = null, mediaType }) => {
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
@@ -74,6 +74,6 @@ const MovieRow = ({ title, movies = [], explorePath = null, mediaType }) => {
        </div>
     </div>
   );
-};
+});
 
 export default MovieRow;
