@@ -5,7 +5,7 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MovieCard from './MovieCard';
 
-const MovieRow = ({ title, movies = [], explorePath = null }) => {
+const MovieRow = ({ title, movies = [], explorePath = null, mediaType }) => {
   const scrollRef = useRef(null);
   const navigate = useNavigate();
 
@@ -55,22 +55,23 @@ const MovieRow = ({ title, movies = [], explorePath = null }) => {
       >
         <ChevronRight className="h-6 w-6" />
       </Button>
-
-      {/* Horizontal Scroll Area */}
-      <div 
-        ref={scrollRef}
-        className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {movies.map((movie, index) => (
-          <div key={`${movie.id || movie._id}-${index}`} className="snap-start shrink-0">
-            <MovieCard 
-              {...movie} 
-              title={movie.title || movie.name}
-            />
-          </div>
-        ))}
-      </div>
+ 
+       {/* Horizontal Scroll Area */}
+       <div 
+         ref={scrollRef}
+         className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x"
+         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+       >
+         {movies.map((movie, index) => (
+           <div key={`${movie.id || movie._id}-${index}`} className="snap-start shrink-0">
+             <MovieCard 
+               {...movie} 
+               title={movie.title || movie.name}
+               mediaType={mediaType || movie.mediaType || movie.media_type}
+             />
+           </div>
+         ))}
+       </div>
     </div>
   );
 };

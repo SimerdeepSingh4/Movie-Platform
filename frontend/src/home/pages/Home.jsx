@@ -16,6 +16,7 @@ const Home = () => {
   const {
     trending, popular, topRated, 
     trendingTV, popularTV, topRatedTV,
+    trendingIndia,
     exclusive,
     netflix, prime, action, comedy, horror, scifi, anime,
     loading, error
@@ -32,12 +33,14 @@ const Home = () => {
           axios.get(`${BASE_URL}/trending/tv/day?api_key=${TMDB_API_KEY}&page=1`),
           axios.get(`${BASE_URL}/tv/popular?api_key=${TMDB_API_KEY}&page=1`),
           axios.get(`${BASE_URL}/tv/top_rated?api_key=${TMDB_API_KEY}&page=1`),
+          axios.get(`${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&region=IN&with_original_language=hi|te|ta|kn|ml|pa|bn&primary_release_date.gte=${new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0]}&sort_by=popularity.desc&page=1`),
           api.get('/movies')
         ]);
 
         const [
           trendingRes, popularRes, topRatedRes,
           trendingTVRes, popularTVRes, topRatedTVRes,
+          trendingIndiaRes,
           exclusiveRes
         ] = results;
 
@@ -49,6 +52,8 @@ const Home = () => {
         if (popularTVRes.status === 'fulfilled') dispatch(setMovies({ category: 'popularTV', data: popularTVRes.value.data.results.map(t => ({ ...t, mediaType: 'tv' })) }));
         if (topRatedTVRes.status === 'fulfilled') dispatch(setMovies({ category: 'topRatedTV', data: topRatedTVRes.value.data.results.map(t => ({ ...t, mediaType: 'tv' })) }));
         
+        if (trendingIndiaRes.status === 'fulfilled') dispatch(setMovies({ category: 'trendingIndia', data: trendingIndiaRes.value.data.results.map(m => ({ ...m, mediaType: 'movie' })) }));
+
         if (exclusiveRes.status === 'fulfilled') dispatch(setMovies({ category: 'exclusive', data: (exclusiveRes.value.data.movies || []).map(m => ({ ...m, mediaType: 'movie' })) }));
 
         // Check for major failures
@@ -174,6 +179,7 @@ const Home = () => {
                 title={<span className="border-l-4 border-yellow-500 pl-3 text-foreground tracking-tight">Trending TV Shows</span>}
                 movies={trendingTV}
                 explorePath="/tv"
+                mediaType="tv"
               />
             </motion.div>
 
@@ -182,6 +188,16 @@ const Home = () => {
                 title={<span className="border-l-4 border-emerald-500 pl-3 text-foreground tracking-tight">Critics' Choice TV</span>}
                 movies={topRatedTV}
                 explorePath="/tv"
+                mediaType="tv"
+              />
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
+              <MovieRow
+                title={<span className="border-l-4 border-orange-600 pl-3 text-foreground tracking-tight">Trending in India</span>}
+                movies={trendingIndia}
+                explorePath="/movies"
+                mediaType="movie"
               />
             </motion.div>
 

@@ -481,7 +481,7 @@ const TvDetails = () => {
 
       {show.similar?.results && show.similar.results.length > 0 && (
         <div className="mt-8">
-          <MovieRow title="Similar TV Shows" movies={show.similar.results} explorePath="/tv" />
+          <MovieRow title="Similar TV Shows" movies={show.similar.results} explorePath="/tv" mediaType="tv" />
         </div>
       )}
 
@@ -489,6 +489,8 @@ const TvDetails = () => {
         isOpen={isTrailerOpen}
         onClose={() => setIsTrailerOpen(false)}
         videoId={trailerVideo?.key}
+        movieId={id}
+        mediaType="tv"
       />
     </div>
   );

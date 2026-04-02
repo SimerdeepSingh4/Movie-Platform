@@ -48,7 +48,7 @@ async function banUser(req, res) {
                     isBanned: true
                 }
             },
-            { new: true }
+            { returnDocument: 'after' }
         );
         return res.status(200).json({
             message: "User banned successfully",
@@ -91,7 +91,7 @@ async function unbanUser(req, res) {
                     isBanned: false
                 }
             },
-            { new: true }
+            { returnDocument: 'after' }
         );
         return res.status(200).json({
             message: "User unbanned successfully",
@@ -157,7 +157,7 @@ async function makeAdmin(req, res) {
                     role: "admin"
                 }
             },
-            { new: true }
+            { returnDocument: 'after' }
         ).select("-password");
 
         return res.status(200).json({
@@ -200,7 +200,7 @@ async function demoteUser(req, res) {
                     role: "user"
                 }
             },
-            { new: true }
+            { returnDocument: 'after' }
         ).select("-password");
 
         return res.status(200).json({

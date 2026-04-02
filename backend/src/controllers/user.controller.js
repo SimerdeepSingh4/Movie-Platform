@@ -100,7 +100,7 @@ async function addWatchHistory(req, res) {
                     source: source || "tmdb" 
                 } 
             },
-            { upsert: true, new: true, setDefaultsOnInsert: true }
+            { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
         );
 
         return res.status(201).json({

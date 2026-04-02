@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const HeroSection = () => {
-  const { trending } = useSelector((state) => state.movies);
+  const { trending, trendingTV } = useSelector((state) => state.movies);
   const { user } = useSelector((state) => state.auth);
   const [movie, setMovie] = useState(null);
   const navigate = useNavigate();
@@ -24,13 +24,14 @@ const HeroSection = () => {
   const [fetchingTrailer, setFetchingTrailer] = useState(false);
 
   useEffect(() => {
-    if (trending && trending.length > 0) {
-      // Pick a random movie from the top 15 trending
-      const randomIndex = Math.floor(Math.random() * Math.min(25, trending.length));
-      setMovie(trending[randomIndex]);
-      setTrailerVideoId(null); // Reset when a new movie is picked
+    const combinedTrending = [...(trending || []), ...(trendingTV || [])];
+    if (combinedTrending.length > 0) {
+      // Pick a random item from the top 50 trending (movies + tv)
+      const randomIndex = Math.floor(Math.random() * Math.min(50, combinedTrending.length));
+      setMovie(combinedTrending[randomIndex]);
+      setTrailerVideoId(null); // Reset when a new item is picked
     }
-  }, [trending]);
+  }, [trending, trendingTV]);
 
   const handleWatchTrailer = async () => {
     if (!user) {
@@ -44,7 +45,8 @@ const HeroSection = () => {
     
     setFetchingTrailer(true);
     try {
-      const res = await axios.get(`https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=videos`);
+      const mediaType = movie.mediaType || movie.media_type || 'movie';
+      const res = await axios.get(`https://api.themoviedb.org/3/${mediaType}/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=videos`);
       const trailer = res.data.videos?.results?.find(
         (vid) => vid.site === 'YouTube' && vid.type === 'Trailer'
       ) || res.data.videos?.results?.[0];
@@ -53,7 +55,7 @@ const HeroSection = () => {
         setTrailerVideoId(trailer.key);
         setIsTrailerOpen(true);
       } else {
-        toast.error("No trailer available for this movie.");
+        toast.error(`No trailer available for this ${mediaType}.`);
       }
     } catch (err) {
       toast.error("Failed to fetch the trailer at this time.");
@@ -66,7 +68,8 @@ const HeroSection = () => {
     if (!user) {
       navigate('/login');
     } else {
-      navigate(`/movie/${movie.id}`);
+      const mediaType = movie.mediaType || movie.media_type || 'movie';
+      navigate(`/${mediaType}/${movie.id}`);
     }
   };
 
@@ -117,7 +120,7 @@ const HeroSection = () => {
         >
           <div className="flex items-center space-x-3 mb-4">
             <Badge variant="default" className="bg-primary text-primary-foreground text-xs md:text-sm px-3 py-1">
-              Trending
+              {movie?.mediaType === 'tv' ? 'Trending TV Show' : 'Trending Movie'}
             </Badge>
             <div className="flex items-center text-yellow-500 font-semibold bg-black/40 px-2 py-1 rounded-md backdrop-blur-md">
               <Star className="h-4 w-4 mr-1 fill-current" />
@@ -167,6 +170,7 @@ const HeroSection = () => {
         onClose={() => setIsTrailerOpen(false)} 
         videoId={trailerVideoId}
         movieId={movie?.id}
+        mediaType={movie?.mediaType || movie?.media_type || 'movie'}
       />
     </div>
   );

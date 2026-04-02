@@ -5,16 +5,19 @@ import { useSelector } from 'react-redux';
 import { Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const MovieCard = ({ title, poster_path, posterUrl, id, _id, rating, mediaType = 'movie' }) => {
+const MovieCard = ({ title, poster_path, posterUrl, id, _id, rating, mediaType, media_type }) => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
 
   const cardId = id || _id;
   const isInternal = !!_id;
+  
+  // Determine media type: priority order - explicit mediaType prop, item's media_type, default to 'movie'
+  const finalMediaType = mediaType || media_type || 'movie';
 
   const handleClick = () => {
     if (user) {
-      navigate(`/${mediaType}/${cardId}${isInternal ? '?source=internal' : ''}`);
+      navigate(`/${finalMediaType}/${cardId}${isInternal ? '?source=internal' : ''}`);
     } else {
       navigate('/login');
     }

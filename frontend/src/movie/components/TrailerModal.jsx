@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 
-const TrailerModal = ({ isOpen, onClose, videoId, movieId }) => {
+const TrailerModal = ({ isOpen, onClose, videoId, movieId, mediaType = 'movie' }) => {
   const [hasTracked, setHasTracked] = useState(false);
 
   useEffect(() => {
@@ -23,20 +23,19 @@ const TrailerModal = ({ isOpen, onClose, videoId, movieId }) => {
           await api.post('/user/history', {
             tmdbId: isMongoId ? undefined : Number(movieId),
             _id_custom: isMongoId ? movieId : undefined,
-            mediaType: 'movie',
+            mediaType: mediaType,
             action: 'watchedTrailer',
             source: isMongoId ? 'internal' : 'tmdb'
           });
           setHasTracked(true);
-          toast('Tracked trailer watch history for movie:');
         } catch (error) {
-          toast.error('Failed to track trailer watch history:');
+          // Silent error for history tracking
         }
       }
     };
 
     trackWatchHistory();
-  }, [isOpen, videoId, movieId, hasTracked]);
+  }, [isOpen, videoId, movieId, hasTracked, mediaType]);
 
   if (!isOpen) return null;
 

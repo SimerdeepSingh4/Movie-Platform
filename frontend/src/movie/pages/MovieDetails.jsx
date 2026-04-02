@@ -503,6 +503,7 @@ const MovieDetails = () => {
         onClose={() => setIsTrailerOpen(false)}
         videoId={trailerVideo?.key}
         movieId={movie.id}
+        mediaType={movie?.mediaType || 'movie'}
       />
     </div>
   );

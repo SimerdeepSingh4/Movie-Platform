@@ -119,7 +119,7 @@ async function updateMovies(req, res) {
                     createdBy: req.user.id
                 }
             },
-            { new: true }
+            { returnDocument: 'after' }
         );
         if (!movie) {
             return res.status(404).json({
