@@ -1,7 +1,8 @@
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import AuthInitializer from './auth/components/AuthInitializer';
 import Layout from './components/Layout';
+import PageLoader from './components/PageLoader';
 
 // Lazy load all pages
 const Home = lazy(() => import('./home/pages/Home'));
@@ -15,11 +16,12 @@ const PersonDetails = lazy(() => import('./person/pages/PersonDetails'));
 const Favorites = lazy(() => import('./profile/pages/Favorites'));
 const Watchlist = lazy(() => import('./profile/pages/Watchlist'));
 const History = lazy(() => import('./profile/pages/History'));
+const Profile = lazy(() => import('./profile/pages/Profile'));
 const NotFoundScreen = lazy(() => import('./pages/NotFoundScreen'));
 
-// Auth (keeping eager as they are small and entry points)
-import Login from '../src/auth/pages/Login';
-import Register from '../src/auth/pages/Register';
+// Auth
+const Login = lazy(() => import('./auth/pages/Login'));
+const Register = lazy(() => import('./auth/pages/Register'));
 
 // Admin
 import AdminGuard from './admin/components/AdminGuard';
@@ -30,7 +32,11 @@ const MovieManagement = lazy(() => import('./admin/pages/MovieManagement'));
 
 export const router = createBrowserRouter([
     {
-        element: <AuthInitializer />,
+        element: (
+            <Suspense fallback={<PageLoader />}>
+                <AuthInitializer />
+            </Suspense>
+        ),
         children: [
             {
                 path: "/",
@@ -79,6 +85,10 @@ export const router = createBrowserRouter([
                     {
                         path: "history",
                         element: <History />
+                    },
+                    {
+                        path: "profile",
+                        element: <Profile />
                     }
                 ]
             },

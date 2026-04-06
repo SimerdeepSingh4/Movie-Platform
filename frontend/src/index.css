@@ -18,9 +18,9 @@
   src: url("../public/Fonts/Sublem.ttf");
 }
 
-/* #root{
+#root{
 user-select: none;
-} */
+}
 :root {
   --background: oklch(0.12 0.02 260);
   --foreground: oklch(0.96 0.01 260);
@@ -68,6 +68,12 @@ user-select: none;
   --sidebar-accent-foreground: oklch(0.96 0.01 260);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.78 0.18 80);
+
+  /* Tonal Surface Tokens */
+  --surface-container-low: #131313;
+  --surface-container: #1a1919;
+  --surface-container-high: #201f1f;
+  --surface-container-highest: #262626;
 }
 
 @theme inline {
@@ -110,11 +116,43 @@ user-select: none;
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+
+  /* Custom Modern Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--primary), transparent 80%);
+    border-radius: 100px;
+    border: 2px solid var(--background);
+    transition: all 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+
+  /* Firefox Support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--primary), transparent 80%) var(--background);
   }
 
   body {
@@ -141,5 +179,31 @@ user-select: none;
     backface-visibility: hidden;
     perspective: 1000px;
     will-change: transform;
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .sidebar-tonal {
+    background: var(--surface-container-low);
+    height: calc(100vh - 64px);
+    position: sticky;
+    top: 64px;
+    z-index: 30;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 30px rgba(var(--primary-rgb), 0.3);
+  }
+
+  .tracking-tighter {
+    letter-spacing: -0.05em;
+  }
+  .tracking-tightest {
+    letter-spacing: -0.075em;
   }
 }

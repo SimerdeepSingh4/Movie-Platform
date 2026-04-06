@@ -31,11 +31,54 @@ const TvDetails = () => {
   const fetchTvDetails = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const searchParams = new URLSearchParams(window.location.search);
+    const isInternal = searchParams.get('source') === 'internal';
+
     try {
-      const res = await axios.get(
-        `${BASE_URL}/tv/${id}?api_key=${TMDB_API_KEY}&append_to_response=videos,credits,similar,watch/providers,content_ratings`
-      );
-      setShow(res.data);
+      if (isInternal) {
+        const res = await api.get(`/movies/${id}`);
+        const localShow = res.data.movie;
+        setShow({
+          ...localShow,
+          name: localShow.title,
+          poster_path: localShow.posterUrl || localShow.poster_path,
+          backdrop_path: localShow.backdropUrl || localShow.backdrop_path,
+          first_air_date: localShow.releaseDate,
+          overview: localShow.description,
+          vote_average: localShow.rating || 0,
+          episode_run_time: [localShow.runtime || 0],
+          number_of_seasons: localShow.totalSeasons || 1,
+          number_of_episodes: localShow.totalEpisodes || 0,
+          status: localShow.status || 'Returning Series',
+          type: localShow.type || 'Scripted',
+          original_language: localShow.language || 'en',
+          origin_country: [localShow.country ? 'US' : 'US'],
+          networks: localShow.network ? [{ name: localShow.network }] : [],
+          genres: localShow.genre ? localShow.genre.split(',').map((g, i) => ({ id: i, name: g.trim() })) : [],
+          credits: {
+            cast: localShow.cast || [],
+            crew: localShow.directedBy ? [{ name: localShow.directedBy, job: 'Director' }] : []
+          },
+          content_ratings: {
+            results: [
+              { iso_3166_1: 'US', rating: localShow.ageRating || 'TV-MA' },
+              { iso_3166_1: 'IN', rating: localShow.ageRating || 'UA' }
+            ]
+          },
+          videos: localShow.trailerUrl ? {
+            results: [{
+              key: localShow.trailerUrl.split('v=')[1] || localShow.trailerUrl.split('/').pop(),
+              site: 'YouTube',
+              type: 'Trailer'
+            }]
+          } : { results: [] }
+        });
+      } else {
+        const res = await axios.get(
+          `${BASE_URL}/tv/${id}?api_key=${TMDB_API_KEY}&append_to_response=videos,credits,similar,watch/providers,content_ratings`
+        );
+        setShow(res.data);
+      }
     } catch (err) {
       setError("Failed to load TV details.");
     } finally {
@@ -81,10 +124,11 @@ const TvDetails = () => {
       const trackHistory = async () => {
         try {
           await api.post('/user/history', {
-            tmdbId: Number(id),
+            tmdbId: !show._id ? Number(id) : undefined,
+            _id_custom: show._id ? show._id : undefined,
             mediaType: 'tv',
             action: 'opened',
-            source: 'tmdb'
+            source: show._id ? 'internal' : 'tmdb'
           });
         } catch (err) {
           console.error("Failed to track history:", err);
@@ -104,9 +148,10 @@ const TvDetails = () => {
         toast.info("Removed from favorites");
       } else {
         await api.post('/user/favorites', {
-          tmdbId: Number(id),
+          tmdbId: !show._id ? Number(id) : undefined,
+          _id_custom: show._id ? show._id : undefined,
           mediaType: 'tv',
-          source: 'tmdb'
+          source: show._id ? 'internal' : 'tmdb'
         });
         setIsFavorite(true);
         toast.success("Added to favorites");
@@ -123,14 +168,15 @@ const TvDetails = () => {
     setIsAddingWatchlist(true);
     try {
       if (isWatchlisted) {
-        await api.delete(`/user/watchlist/tv/${id}`);
+        await api.delete(`/user/watchlist/tv/${show._id || id}`);
         setIsWatchlisted(false);
         toast.info("Removed from watchlist");
       } else {
         await api.post('/user/watchlist', {
-          tmdbId: Number(id),
+          tmdbId: !show._id ? Number(id) : undefined,
+          _id_custom: show._id ? show._id : undefined,
           mediaType: 'tv',
-          source: 'tmdb'
+          source: show._id ? 'internal' : 'tmdb'
         });
         setIsWatchlisted(true);
         toast.success("Added to watchlist");
@@ -199,10 +245,12 @@ const TvDetails = () => {
         : (show.posterUrl || (show.poster_path ? `https://image.tmdb.org/t/p/w1280${show.poster_path}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoWcWg0E8pSjBNi0TtiZsqu8uD2PAr_K11DA&s')));
 
   const deduplicateProviders = (providers) => {
-    if (!providers) return null;
+    if (!providers || !Array.isArray(providers)) return [];
     const seen = new Set();
     return providers.filter(provider => {
-      const normalizedName = provider.provider_name.replace(/ with Ads/i, '').trim();
+      if (!provider) return false;
+      const name = provider.provider_name || provider.name || 'Unknown';
+      const normalizedName = name.replace(/ with Ads/i, '').trim().toLowerCase();
       if (seen.has(normalizedName)) {
         return false;
       }
@@ -222,7 +270,12 @@ const TvDetails = () => {
   const flatrateProviders = deduplicateProviders([
     ...(watchProviders.flatrate || []),
     ...(watchProviders.ads || []),
-    ...(watchProviders.free || [])
+    ...(watchProviders.free || []),
+    ...(show.watchProviders || []).map(p => ({
+      provider_id: p.id || Math.random(),
+      provider_name: p.name || 'Streaming Service',
+      logo_path: p.logo_path || null
+    }))
   ]);
   const rentProviders = deduplicateProviders(watchProviders.rent);
   const buyProviders = deduplicateProviders(watchProviders.buy);
@@ -353,7 +406,9 @@ const TvDetails = () => {
                 <div className="border-l-2 border-primary pl-4 md:pl-6">
                   <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground/40 mb-1">Country</p>
                   <p className="font-extrabold text-sm md:text-md text-white">
-                    {getFullCountryName(show.origin_country?.[0] || 'US')}
+                    {show._id 
+                      ? (show.country || 'N/A') 
+                      : getFullCountryName(show.origin_country?.[0] || 'US')}
                   </p>
                 </div>
                 <div className="border-l-2 border-primary pl-4 md:pl-6">
@@ -377,11 +432,17 @@ const TvDetails = () => {
                     {flatrateProviders && flatrateProviders.length > 0 ? (
                       flatrateProviders.map(provider => (
                         <div key={provider.provider_id} className="group/provider relative">
-                          <img 
-                            src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                            alt={provider.provider_name}
-                            className="h-8 w-8 md:h-9 md:w-9 rounded-xl border border-white/10 shadow-lg transition-transform hover:scale-110"
-                          />
+                          {provider.logo_path ? (
+                            <img
+                              src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                              alt={provider.provider_name}
+                              className="h-8 w-8 md:h-9 md:w-9 rounded-xl border border-white/10 shadow-lg transition-transform hover:scale-110"
+                            />
+                          ) : (
+                            <div className="px-3 py-1.5 rounded-xl bg-primary/20 border border-primary/30 text-[10px] font-black text-primary uppercase whitespace-nowrap">
+                              {provider.provider_name}
+                            </div>
+                          )}
                         </div>
                       ))
                     ) : (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button"
+import { Eye, EyeOff } from "lucide-react";
 import {
   Card,
   CardAction,
@@ -23,6 +24,7 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user && initialized) {
@@ -166,14 +168,27 @@ const Register = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  onChange={(e) => setPassword(e.target.value)}
-                  id="password"
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  className="bg-background/50 focus:bg-background transition-colors"
-                />
+                <div className="relative">
+                  <Input
+                    onChange={(e) => setPassword(e.target.value)}
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="••••••••"
+                    className="bg-background/50 focus:bg-background transition-colors pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           </CardContent>

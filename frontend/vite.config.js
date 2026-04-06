@@ -39,4 +39,27 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Include only safe, large, non-core libraries for splitting
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('framer-motion')) {
+              return 'vendor-animation';
+            }
+            if (id.includes('axios') || id.includes('sonner')) {
+              return 'vendor-utils';
+            }
+            // Avoid manual splitting for react, react-dom, and other core framework dependencies
+            // This prevents "Cannot set properties of undefined (setting 'Activity')" and similar errors
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  }
 })

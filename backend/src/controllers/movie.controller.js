@@ -2,7 +2,9 @@ const movieModel = require("../models/movie.model");
 
 async function addMovie(req, res) {
     try {
-        const { title, description, releaseDate, trailerUrl, genre, tmdbId, category, posterUrl } = req.body
+        const { title, description, releaseDate, trailerUrl, genre, tmdbId, category, posterUrl, backdropUrl, cast,
+            directedBy, country, language, ageRating, runtime, status, network, type, totalEpisodes, totalSeasons, watchProviders
+        } = req.body
 
         const isMovieExist = await movieModel.findOne({
             $or: [
@@ -26,6 +28,19 @@ async function addMovie(req, res) {
             tmdbId,
             category,
             posterUrl,
+            backdropUrl,
+            cast,
+            directedBy,
+            country,
+            language,
+            ageRating,
+            runtime,
+            status,
+            network,
+            type,
+            totalEpisodes,
+            totalSeasons,
+            watchProviders,
             createdBy: req.user.id
         })
 
@@ -102,7 +117,9 @@ async function deleteMovies(req, res) {
 async function updateMovies(req, res) {
     try {
         const { id } = req.params;
-        const { title, description, releaseDate, trailerUrl, genre, tmdbId, category, posterUrl } = req.body
+        const { title, description, releaseDate, trailerUrl, genre, tmdbId, category, posterUrl, backdropUrl, cast,
+            directedBy, country, language, ageRating, runtime, status, network, type, totalEpisodes, totalSeasons, watchProviders
+        } = req.body
 
         const movie = await movieModel.findByIdAndUpdate(
             id,
@@ -116,6 +133,19 @@ async function updateMovies(req, res) {
                     tmdbId,
                     category,
                     posterUrl,
+                    backdropUrl,
+                    cast,
+                    directedBy,
+                    country,
+                    language,
+                    ageRating,
+                    runtime,
+                    status,
+                    network,
+                    type,
+                    totalEpisodes,
+                    totalSeasons,
+                    watchProviders,
                     createdBy: req.user.id
                 }
             },

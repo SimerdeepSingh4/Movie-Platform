@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
         },
         photoUrl: {
             type: String,
-            default: "https://ik.imagekit.io/dhyh95euj/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg",
+            default: "https://ik.imagekit.io/dhyh95euj/6880091_v=4",
         },
     },
     { timestamps: true }

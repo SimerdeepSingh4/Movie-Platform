@@ -5,7 +5,6 @@ import api from '@/lib/api';
 import HeroSection from '../components/HeroSection';
 import MovieRow from '../components/MovieRow';
 import { setMovies, setLoading, setError } from '../../store/movieSlice';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -14,7 +13,7 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 const Home = () => {
   const dispatch = useDispatch();
   const {
-    trending, popular, topRated, 
+    trending, popular, topRated,
     trendingTV, popularTV, topRatedTV,
     trendingIndia,
     exclusive,
@@ -47,11 +46,11 @@ const Home = () => {
         if (trendingRes.status === 'fulfilled') dispatch(setMovies({ category: 'trending', data: trendingRes.value.data.results.map(m => ({ ...m, mediaType: 'movie' })) }));
         if (popularRes.status === 'fulfilled') dispatch(setMovies({ category: 'popular', data: popularRes.value.data.results.map(m => ({ ...m, mediaType: 'movie' })) }));
         if (topRatedRes.status === 'fulfilled') dispatch(setMovies({ category: 'topRated', data: topRatedRes.value.data.results.map(m => ({ ...m, mediaType: 'movie' })) }));
-        
+
         if (trendingTVRes.status === 'fulfilled') dispatch(setMovies({ category: 'trendingTV', data: trendingTVRes.value.data.results.map(t => ({ ...t, mediaType: 'tv' })) }));
         if (popularTVRes.status === 'fulfilled') dispatch(setMovies({ category: 'popularTV', data: popularTVRes.value.data.results.map(t => ({ ...t, mediaType: 'tv' })) }));
         if (topRatedTVRes.status === 'fulfilled') dispatch(setMovies({ category: 'topRatedTV', data: topRatedTVRes.value.data.results.map(t => ({ ...t, mediaType: 'tv' })) }));
-        
+
         if (trendingIndiaRes.status === 'fulfilled') dispatch(setMovies({ category: 'trendingIndia', data: trendingIndiaRes.value.data.results.map(m => ({ ...m, mediaType: 'movie' })) }));
 
         if (exclusiveRes.status === 'fulfilled') dispatch(setMovies({ category: 'exclusive', data: (exclusiveRes.value.data.movies || []).map(m => ({ ...m, mediaType: 'movie' })) }));
@@ -109,10 +108,10 @@ const Home = () => {
           if (moviesResult.status !== 'fulfilled' && tvsResult?.status !== 'fulfilled') return [];
           const movies = moviesResult.status === 'fulfilled' ? moviesResult.value.data.results : [];
           const tvs = (tvsResult && tvsResult.status === 'fulfilled') ? tvsResult.value.data.results : [];
-          
+
           const m = movies.map(item => ({ ...item, mediaType: 'movie' }));
           const t = tvs.map(item => ({ ...item, mediaType: 'tv' }));
-          
+
           const combined = [];
           const max = Math.max(m.length, t.length);
           for (let i = 0; i < max; i++) {
@@ -142,160 +141,122 @@ const Home = () => {
   }, [dispatch, trending.length, netflix.length]);
 
   return (
-    <div className="bg-gradient-to-b from-background via-background to-muted/20 min-h-screen pb-16">
+    <div className="bg-background min-h-screen pb-24 overflow-x-hidden">
       <HeroSection />
 
-      <div className="mt-[-50px] md:mt-[-50px] relative z-30 space-y-10">
+      <div className="relative z-30 pt-2 space-y-4 md:space-y-6">
         {loading && trending.length === 0 && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="flex justify-center items-center py-40">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.5)]"></div>
           </div>
         )}
+
         {error && trending.length === 0 && (
-          <div className="container mx-auto px-4 py-8">
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-6 py-4 rounded-lg">
-              <h3 className="font-bold text-lg mb-1">Attention</h3>
-              <p>{error}</p>
+          <div className="container mx-auto px-4 py-12">
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-8 py-6 rounded-2xl backdrop-blur-xl">
+              <h3 className="font-black uppercase tracking-widest text-xl mb-2 italic">Alert</h3>
+              <p className="font-medium opacity-80">{error}</p>
             </div>
           </div>
         )}
+
         {(!loading || trending.length > 0) && !error && (
           <>
             {exclusive && exclusive.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <MovieRow title={<span className="border-l-4 border-primary pl-3 text-foreground tracking-tight">Posted by CINEBASE Admin's</span>} movies={exclusive} />
-              </motion.div>
+              <MovieRow title="Exclusive Originals" movies={exclusive} />
             )}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <MovieRow
-                title={<span className="border-l-4 border-orange-500 pl-3 text-foreground tracking-tight">Trending Movies</span>}
-                movies={trending}
-                explorePath="/movies"
-              />
-            </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <MovieRow
-                title={<span className="border-l-4 border-yellow-500 pl-3 text-foreground tracking-tight">Trending TV Shows</span>}
-                movies={trendingTV}
-                explorePath="/tv"
-                mediaType="tv"
-              />
-            </motion.div>
+            <MovieRow
+              title="Weekly Top Trending"
+              movies={trending}
+              explorePath="/movies"
+            />
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-              <MovieRow
-                title={<span className="border-l-4 border-emerald-500 pl-3 text-foreground tracking-tight">Critics' Choice TV</span>}
-                movies={topRatedTV}
-                explorePath="/tv"
-                mediaType="tv"
-              />
-            </motion.div>
+            <MovieRow
+              title="Binge-worthy Series"
+              movies={trendingTV}
+              explorePath="/tv"
+              mediaType="tv"
+            />
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-              <MovieRow
-                title={<span className="border-l-4 border-orange-600 pl-3 text-foreground tracking-tight">Trending in India</span>}
-                movies={trendingIndia}
-                explorePath="/movies"
-                mediaType="movie"
-              />
-            </motion.div>
+            <MovieRow
+              title="Critics' Highest Rated"
+              movies={topRatedTV}
+              explorePath="/tv"
+              mediaType="tv"
+            />
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-              <MovieRow
-                title={<span className="border-l-4 border-blue-500 pl-3 text-foreground tracking-tight">Top Rated Classics</span>}
-                movies={topRated}
-                explorePath="/movies"
-              />
-            </motion.div>
+            <MovieRow
+              title="Trending in India"
+              movies={trendingIndia}
+              explorePath="/movies"
+              mediaType="movie"
+            />
 
-            {/* OTT Platforms */}
-            {netflix.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+            <MovieRow
+              title="All-Time Classics"
+              movies={topRated}
+              explorePath="/movies"
+            />
+
+            {/* OTT Platforms - Visual Separator */}
+            <div className="py-2 md:py-4">
+              {netflix.length > 0 && (
                 <MovieRow
                   title={
-                    <span className="flex items-center gap-2 text-base lg:text-2xl">
+                    <div className="flex items-center gap-3">
                       <img
                         src="https://upload.wikimedia.org/wikipedia/commons/7/75/Netflix_icon.svg"
                         alt="Netflix"
-                        className="h-6 w-6 object-contain"
+                        className="h-8 w-8 object-contain drop-shadow-lg"
                       />
-                      Don't Miss These on Netflix
-                    </span>
+                      <span>Trending on Netflix</span>
+                    </div>
                   }
                   movies={netflix}
                   explorePath="/platform/8?name=Netflix"
                 />
-              </motion.div>
-            )}
+              )}
 
-            {prime.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
-                <MovieRow
-                  title={
-                    <span className="flex items-center gap-2 text-base lg:text-2xl ">
-                      <img
-                        src="https://commons.wikimedia.org/wiki/Special:FilePath/Amazon_Prime_Video_blue_logo_1.svg"
-                        alt="Prime Video"
-                        className="h-5 w-auto object-contain"
-                        title="Prime Video"
-                      />
-                      Worth Watching on Prime
-                    </span>
-                  }
-                  movies={prime}
-                  explorePath="/platform/119?name=Prime+Video"
-                />
-              </motion.div>
-            )}
+              {prime.length > 0 && (
+                <div className="mt-4 md:mt-8">
+                  <MovieRow
+                    title={
+                      <div className="flex items-center gap-3">
+                        <img
+                          src="https://upload.wikimedia.org/wikipedia/commons/1/11/Amazon_Prime_Video_logo.svg"
+                          alt="Prime Video"
+                          className="h-6 w-auto object-contain brightness-0 invert"
+                        />
+                        <span>Featured on Prime Video</span>
+                      </div>
+                    }
+                    movies={prime}
+                    explorePath="/platform/119?name=Prime+Video"
+                  />
+                </div>
+              )}
 
-            {/* Genres */}
-            {action.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}>
-                <MovieRow
-                  title={<span className="border-l-4 border-red-500 pl-3 text-foreground tracking-tight">Action Packed</span>}
-                  movies={action}
-                  explorePath="/movies"
-                />
-              </motion.div>
-            )}
-            {comedy.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}>
-                <MovieRow
-                  title={<span className="border-l-4 border-yellow-500 pl-3 text-foreground tracking-tight">Comedy Picks</span>}
-                  movies={comedy}
-                  explorePath="/movies"
-                />
-              </motion.div>
-            )}
-            {horror.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
-                <MovieRow
-                  title={<span className="border-l-4 border-purple-500 pl-3 text-foreground tracking-tight">Late Night Screams</span>}
-                  movies={horror}
-                  explorePath="/movies"
-                />
-              </motion.div>
-            )}
-            {scifi.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.3 }}>
-                <MovieRow
-                  title={<span className="border-l-4 border-cyan-400 pl-3 text-foreground tracking-tight">Mind-Bending Sci-Fi</span>}
-                  movies={scifi}
-                  explorePath="/movies"
-                />
-              </motion.div>
-            )}
-            {anime.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.4 }}>
-                <MovieRow
-                  title={<span className="border-l-4 border-pink-500 pl-3 text-foreground tracking-tight">Anime Favorites</span>}
-                  movies={anime}
-                  explorePath="/movies"
-                />
-              </motion.div>
-            )}
+            </div>
 
+            {/* Genre-based Curated Lists */}
+            <div className="space-y-4 md:space-y-8">
+              {action.length > 0 && (
+                <MovieRow title="High Octane Action" movies={action} explorePath="/movies" />
+              )}
+              {comedy.length > 0 && (
+                <MovieRow title="Laughter Unlimited" movies={comedy} explorePath="/movies" />
+              )}
+              {horror.length > 0 && (
+                <MovieRow title="Midnight Thrillers" movies={horror} explorePath="/movies" />
+              )}
+              {scifi.length > 0 && (
+                <MovieRow title="Future & Beyond" movies={scifi} explorePath="/movies" />
+              )}
+              {anime.length > 0 && (
+                <MovieRow title="Masterpiece Anime" movies={anime} explorePath="/movies" />
+              )}
+            </div>
           </>
         )}
       </div>
@@ -304,3 +265,4 @@ const Home = () => {
 };
 
 export default Home;
+

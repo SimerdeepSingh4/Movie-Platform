@@ -45,6 +45,34 @@ const movieSchema = new mongoose.Schema(
             type: String,
             default: "https://ik.imagekit.io/dhyh95euj/notfound_portrait.jpg",
         },
+        backdropUrl: {
+            type: String,
+            default: "https://ik.imagekit.io/dhyh95euj/notfound_landscape.jpg",
+        },
+        directedBy: String,
+        country: String,
+        language: String,
+        ageRating: String,
+        runtime: Number,
+        status: String,
+        network: String,
+        type: String,
+        totalEpisodes: Number,
+        totalSeasons: Number,
+        watchProviders: [
+            {
+                id: Number,
+                name: String,
+                logo_path: String,
+            }
+        ],
+        cast: [
+            {
+                id: Number,
+                name: String,
+                profile_path: String,
+            }
+        ],
     },
     { timestamps: true }
 );

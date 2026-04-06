@@ -243,6 +243,61 @@ async function removeWatchlist(req, res) {
     }
 }
 
+async function updateProfile(req, res) {
+    try {
+        const { username, email, photoUrl } = req.body;
+        const user = await userModel.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        // Check if new username/email is taken by another user
+        if (username && username !== user.username) {
+            const existingUser = await userModel.findOne({ username });
+            if (existingUser) {
+                return res.status(409).json({
+                    message: "Username already exists"
+                });
+            }
+            user.username = username;
+        }
+
+        if (email && email !== user.email) {
+            const existingUser = await userModel.findOne({ email });
+            if (existingUser) {
+                return res.status(409).json({
+                    message: "Email already exists"
+                });
+            }
+            user.email = email;
+        }
+
+        if (photoUrl) {
+            user.photoUrl = photoUrl;
+        }
+
+        await user.save();
+
+        return res.status(200).json({
+            message: "Profile updated successfully",
+            user: {
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                photoUrl: user.photoUrl
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Failed to update profile",
+            error: error.message
+        });
+    }
+}
+
 async function searchUsers(req, res) {
     try {
         const { query = '' } = req.query;
@@ -274,5 +329,6 @@ module.exports = {
     addWatchlist,
     getWatchlist,
     removeWatchlist,
-    searchUsers
+    searchUsers,
+    updateProfile
 };

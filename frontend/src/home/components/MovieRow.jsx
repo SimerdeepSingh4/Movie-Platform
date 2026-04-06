@@ -1,77 +1,73 @@
-import React, { useRef, memo } from 'react';
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import React, { memo } from 'react';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from "@/components/ui/carousel";
 import { Button } from '@/components/ui/button';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MovieCard from './MovieCard';
+import { motion } from 'framer-motion';
 
 const MovieRow = memo(({ title, movies = [], explorePath = null, mediaType }) => {
-  const scrollRef = useRef(null);
   const navigate = useNavigate();
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left' 
-        ? scrollLeft - clientWidth * 0.75 
-        : scrollLeft + clientWidth * 0.75;
-      
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
-  };
 
   if (!movies || movies.length === 0) return null;
 
   return (
-    <div className="pl-4 py-6 relative group w-full overflow-hidden">
-      <div className="flex justify-between items-end mb-4 px-4">
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2>
+    <div className="py-4 relative group/row w-full overflow-hidden">
+      <div className="flex justify-between items-end mb-4 px-4 md:px-12">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl md:text-3xl font-black tracking-tighter text-foreground uppercase italic drop-shadow-sm">
+            {title}
+          </h2>
+          <div className="h-1 w-12 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
+        </div>
+        
         {explorePath && (
           <Button 
-            variant="link" 
-            className="text-muted-foreground hover:text-primary p-0"
+            variant="ghost" 
+            size="sm"
+            className="text-muted-foreground hover:text-primary hover:bg-primary/10 font-bold uppercase tracking-widest text-[10px] gap-2 rounded-full px-4 transition-all"
             onClick={() => navigate(explorePath)}
           >
-            View All <ChevronRight className="h-4 w-4 ml-1" />
+            Explore All <ChevronRight className="h-3 w-3" />
           </Button>
         )}
       </div>
       
-      {/* Custom Navigation Buttons visible on hover */}
-      <Button 
-        variant="secondary" 
-        size="icon" 
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full opacity-0 group-hover:opacity-100 transition duration-300 hidden md:flex hover:bg-white hover:text-black"
-        onClick={() => scroll('left')}
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </Button>
-      
-      <Button 
-        variant="secondary" 
-        size="icon" 
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full opacity-0 group-hover:opacity-100 transition duration-300 hidden md:flex hover:bg-white hover:text-black"
-        onClick={() => scroll('right')}
-      >
-        <ChevronRight className="h-6 w-6" />
-      </Button>
- 
-       {/* Horizontal Scroll Area */}
-       <div 
-         ref={scrollRef}
-         className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x"
-         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-       >
-         {movies.map((movie, index) => (
-           <div key={`${movie.id || movie._id}-${index}`} className="snap-start shrink-0">
-             <MovieCard 
-               {...movie} 
-               title={movie.title || movie.name}
-               mediaType={mediaType || movie.mediaType || movie.media_type}
-             />
-           </div>
-         ))}
-       </div>
+      <div className="px-4 md:px-12 relative">
+        <Carousel
+          opts={{
+            align: "start",
+            loop: false,
+            dragFree: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-4 h-[300px] md:h-[380px] items-center">
+            {movies.map((movie, index) => (
+              <CarouselItem key={`${movie.id || movie._id}-${index}`} className="pl-4 basis-auto">
+                <div className="py-4">
+                  <MovieCard 
+                    {...movie} 
+                    title={movie.title || movie.name}
+                    mediaType={mediaType || movie.mediaType || movie.media_type}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          
+          <div className="hidden md:block">
+            <CarouselPrevious className="left-4 h-12 w-12 rounded-full border-border/20 bg-background/20 backdrop-blur-xl hover:bg-primary/20 hover:text-primary hover:border-primary/50 transition-all opacity-0 hover:opacity-100" />
+            <CarouselNext className="right-4 h-12 w-12 rounded-full border-border/20 bg-background/20 backdrop-blur-xl hover:bg-primary/20 hover:text-primary hover:border-primary/50 transition-all opacity-0 hover:opacity-100" />
+          </div>
+        </Carousel>
+      </div>
     </div>
   );
 });

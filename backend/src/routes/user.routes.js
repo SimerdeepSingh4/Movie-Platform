@@ -20,5 +20,6 @@ userRoutes.get("/watchlist", authUser, userController.getWatchlist);
 userRoutes.post("/watchlist", authUser, userController.addWatchlist);
 userRoutes.delete("/watchlist/:type/:id", authUser, userController.removeWatchlist);
 userRoutes.get("/search", authUser, userController.searchUsers);
+userRoutes.put("/profile", authUser, userController.updateProfile);
 
 module.exports = userRoutes;

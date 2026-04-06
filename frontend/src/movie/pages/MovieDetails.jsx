@@ -41,10 +41,31 @@ const MovieDetails = () => {
         setMovie({
           ...localMovie,
           name: localMovie.title, // Map title to name for consistency
-          poster_path: localMovie.posterUrl,
+          poster_path: localMovie.posterUrl || localMovie.poster_path,
+          backdrop_path: localMovie.backdropUrl || localMovie.backdrop_path,
           release_date: localMovie.releaseDate,
           overview: localMovie.description,
           vote_average: localMovie.rating || 0,
+          runtime: localMovie.runtime || 0,
+          original_language: localMovie.language || 'en',
+          production_countries: localMovie.country ? [{ name: localMovie.country, iso_3166_1: 'US' }] : [],
+          genres: localMovie.genre ? localMovie.genre.split(',').map((g, i) => ({ id: i, name: g.trim() })) : [],
+          credits: {
+            cast: localMovie.cast || [],
+            crew: localMovie.directedBy ? [{ name: localMovie.directedBy, job: 'Director' }] : []
+          },
+          release_dates: {
+            results: [
+              {
+                iso_3166_1: 'US',
+                release_dates: [{ certification: localMovie.ageRating || 'PG-13' }]
+              },
+              {
+                iso_3166_1: 'IN',
+                release_dates: [{ certification: localMovie.ageRating || 'UA' }]
+              }
+            ]
+          },
           videos: localMovie.trailerUrl ? {
             results: [{
               key: localMovie.trailerUrl.split('v=')[1] || localMovie.trailerUrl.split('/').pop(),
@@ -238,11 +259,13 @@ const MovieDetails = () => {
         : (movie.posterUrl || `https://image.tmdb.org/t/p/w1280${movie.poster_path}`));
 
   const deduplicateProviders = (providers) => {
-    if (!providers) return null;
+    if (!providers || !Array.isArray(providers)) return [];
     const seen = new Set();
     return providers.filter(provider => {
+      if (!provider) return false;
       // Normalize name to catch "Amazon Prime Video with Ads" vs "Amazon Prime Video"
-      const normalizedName = provider.provider_name.replace(/ with Ads/i, '').trim();
+      const name = provider.provider_name || provider.name || 'Unknown';
+      const normalizedName = name.replace(/ with Ads/i, '').trim().toLowerCase();
       if (seen.has(normalizedName)) {
         return false;
       }
@@ -262,7 +285,12 @@ const MovieDetails = () => {
   const flatrateProviders = deduplicateProviders([
     ...(watchProviders.flatrate || []),
     ...(watchProviders.ads || []),
-    ...(watchProviders.free || [])
+    ...(watchProviders.free || []),
+    ...(movie.watchProviders || []).map(p => ({
+      provider_id: p.id || Math.random(),
+      provider_name: p.name || 'Streaming Service',
+      logo_path: p.logo_path || null
+    }))
   ]);
   const rentProviders = deduplicateProviders(watchProviders.rent);
   const buyProviders = deduplicateProviders(watchProviders.buy);
@@ -386,7 +414,9 @@ const MovieDetails = () => {
                 <div className="border-l-2 border-primary pl-4 md:pl-6">
                   <p className="text-[10px] uppercase tracking-[0.2em] font-black text-muted-foreground/40 mb-1">Country</p>
                   <p className="font-extrabold text-sm md:text-md text-white">
-                    {getFullCountryName(movie.production_countries?.[0]?.iso_3166_1 || 'US')}
+                    {movie._id 
+                      ? (movie.country || 'N/A') 
+                      : getFullCountryName(movie.production_countries?.[0]?.iso_3166_1 || 'US')}
                   </p>
                 </div>
                 <div className="border-l-2 border-primary pl-4 md:pl-6">
@@ -410,11 +440,17 @@ const MovieDetails = () => {
                     {flatrateProviders && flatrateProviders.length > 0 ? (
                       flatrateProviders.map(provider => (
                         <div key={provider.provider_id} className="group/provider relative">
-                          <img
-                            src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
-                            alt={provider.provider_name}
-                            className="h-8 w-8 md:h-9 md:w-9 rounded-xl border border-white/10 shadow-lg transition-transform hover:scale-110"
-                          />
+                          {provider.logo_path ? (
+                            <img
+                              src={`https://image.tmdb.org/t/p/original${provider.logo_path}`}
+                              alt={provider.provider_name}
+                              className="h-8 w-8 md:h-9 md:w-9 rounded-xl border border-white/10 shadow-lg transition-transform hover:scale-110"
+                            />
+                          ) : (
+                            <div className="px-3 py-1.5 rounded-xl bg-primary/20 border border-primary/30 text-[10px] font-black text-primary uppercase whitespace-nowrap">
+                              {provider.provider_name}
+                            </div>
+                          )}
                         </div>
                       ))
                     ) : (
