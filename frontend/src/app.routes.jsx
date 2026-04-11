@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import AuthInitializer from './auth/components/AuthInitializer';
+import Protected from './auth/components/Protected';
 import Layout from './components/Layout';
 import PageLoader from './components/PageLoader';
 
@@ -51,44 +52,50 @@ export const router = createBrowserRouter([
                         element: <Search />
                     },
                     {
-                        path: "movie/:id",
-                        element: <MovieDetails />
-                    },
-                    {
                         path: "movies",
                         element: <Movies />
-                    },
-                    {
-                        path: "platform/:providerId",
-                        element: <PlatformCollection />
                     },
                     {
                         path: "tv",
                         element: <TvShows />
                     },
+                    // Protected Routes
                     {
-                        path: "tv/:id",
-                        element: <TvDetails />
-                    },
-                    {
-                        path: "person/:id",
-                        element: <PersonDetails />
-                    },
-                    {
-                        path: "favorites",
-                        element: <Favorites />
-                    },
-                    {
-                        path: "watchlist",
-                        element: <Watchlist />
-                    },
-                    {
-                        path: "history",
-                        element: <History />
-                    },
-                    {
-                        path: "profile",
-                        element: <Profile />
+                        element: <Protected />,
+                        children: [
+                            {
+                                path: "movie/:id",
+                                element: <MovieDetails />
+                            },
+                            {
+                                path: "platform/:providerId",
+                                element: <PlatformCollection />
+                            },
+                            {
+                                path: "tv/:id",
+                                element: <TvDetails />
+                            },
+                            {
+                                path: "person/:id",
+                                element: <PersonDetails />
+                            },
+                            {
+                                path: "favorites",
+                                element: <Favorites />
+                            },
+                            {
+                                path: "watchlist",
+                                element: <Watchlist />
+                            },
+                            {
+                                path: "history",
+                                element: <History />
+                            },
+                            {
+                                path: "profile",
+                                element: <Profile />
+                            }
+                        ]
                     }
                 ]
             },

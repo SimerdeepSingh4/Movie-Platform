@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React from 'react';
 import axios from 'axios';
+import api from '@/lib/api';
+import { useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useInView } from 'react-intersection-observer';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Library, Filter, ArrowRight, Languages as LanguagesIcon, ChevronDown, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import MovieCard from '../../home/components/MovieCard';
 import { cn } from '@/lib/utils';
 import {
@@ -18,9 +19,11 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { setMoviesState, updateMoviesList, saveScrollPosition } from '@/store/exploreSlice';
+import { useCallback, useEffect, useRef, useState } from 'react';  
 
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
+
 
 const LANGUAGES = [
   { label: 'Hindi', code: 'hi' },
@@ -41,7 +44,10 @@ const LANGUAGES = [
 
 const Movies = () => {
   const dispatch = useDispatch();
-  const { list: movies, page, totalPages, genre: selectedGenre, lang: selectedLanguage, scrollPos, hasLoaded } = useSelector(state => state.explore.movies);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlCategory = searchParams.get('category');
+  
+  const { list: movies, page, totalPages, genre: selectedGenre, lang: selectedLanguage, category: selectedCategory, scrollPos, hasLoaded } = useSelector(state => state.explore.movies);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [genres, setGenres] = useState([]);
@@ -70,6 +76,13 @@ const Movies = () => {
     };
   }, [dispatch]);
 
+  // Sync URL category with Redux state
+  useEffect(() => {
+    if (urlCategory !== selectedCategory) {
+      dispatch(setMoviesState({ category: urlCategory, page: 1, list: [], hasLoaded: false, genre: null, lang: null }));
+    }
+  }, [urlCategory, selectedCategory, dispatch]);
+
   // Restore scroll position after data is loaded
   useEffect(() => {
     if (movies.length > 0 && !hasRestoredScroll.current && scrollPos > 0) {
@@ -78,24 +91,50 @@ const Movies = () => {
     }
   }, [movies, scrollPos]);
 
-  const fetchMovies = useCallback(async (pageNum, genreId, langCode) => {
+  const fetchMovies = useCallback(async (pageNum, genreId, langCode, category) => {
     setLoading(true);
     setError(null);
     try {
-      let endpoint = `${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&page=${pageNum}&sort_by=popularity.desc`;
-      if (genreId) {
-        endpoint += `&with_genres=${genreId}`;
-      }
-      if (langCode) {
-        endpoint += `&with_original_language=${langCode}`;
-      }
-      const res = await axios.get(endpoint);
+      let endpoint;
+      let isLocalApi = false;
 
-      dispatch(updateMoviesList({
-        list: res.data.results,
-        page: pageNum,
-        totalPages: res.data.total_pages
-      }));
+      if (category === 'trending') {
+        endpoint = `${BASE_URL}/trending/movie/day?api_key=${TMDB_API_KEY}&page=${pageNum}`;
+      } else if (category === 'top_rated') {
+        endpoint = `${BASE_URL}/movie/top_rated?api_key=${TMDB_API_KEY}&page=${pageNum}`;
+      } else if (category === 'popular') {
+        endpoint = `${BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=${pageNum}`;
+      } else if (category === 'trending_india') {
+        const sixMonthsAgo = new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0];
+        endpoint = `${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&region=IN&with_original_language=hi|te|ta|kn|ml|pa|bn&primary_release_date.gte=${sixMonthsAgo}&sort_by=popularity.desc&page=${pageNum}`;
+      } else if (category === 'exclusive') {
+        isLocalApi = true;
+      } else {
+        endpoint = `${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&page=${pageNum}&sort_by=popularity.desc`;
+        if (genreId) endpoint += `&with_genres=${genreId}`;
+        if (langCode) endpoint += `&with_original_language=${langCode}`;
+      }
+
+      if (isLocalApi) {
+        if (pageNum > 1) {
+          setLoading(false);
+          return;
+        }
+        const res = await api.get('/movies');
+        const exclusiveMovies = (res.data.movies || []).map(m => ({ ...m, mediaType: 'movie' }));
+        dispatch(updateMoviesList({
+          list: exclusiveMovies,
+          page: 1,
+          totalPages: 1
+        }));
+      } else {
+        const res = await axios.get(endpoint);
+        dispatch(updateMoviesList({
+          list: res.data.results,
+          page: pageNum,
+          totalPages: res.data.total_pages
+        }));
+      }
 
     } catch (err) {
       setError("Failed to fetch movies.");
@@ -106,24 +145,32 @@ const Movies = () => {
 
   // Handle Genre/Language changes
   const handleGenreChange = (genreId) => {
-    dispatch(setMoviesState({ genre: genreId, page: 1, list: [], hasLoaded: false }));
+    setSearchParams(prev => {
+      prev.delete('category');
+      return prev;
+    });
+    dispatch(setMoviesState({ genre: genreId, page: 1, list: [], hasLoaded: false, category: null }));
   };
 
   const handleLangChange = (langCode) => {
-    dispatch(setMoviesState({ lang: langCode, page: 1, list: [], hasLoaded: false }));
+    setSearchParams(prev => {
+      prev.delete('category');
+      return prev;
+    });
+    dispatch(setMoviesState({ lang: langCode, page: 1, list: [], hasLoaded: false, category: null }));
   };
 
   useEffect(() => {
     if (!hasLoaded) {
-      fetchMovies(1, selectedGenre, selectedLanguage);
+      fetchMovies(1, selectedGenre, selectedLanguage, selectedCategory);
     }
-  }, [selectedGenre, selectedLanguage, fetchMovies, hasLoaded]);
+  }, [selectedGenre, selectedLanguage, selectedCategory, fetchMovies, hasLoaded]);
 
   useEffect(() => {
     if (inView && !loading && page < totalPages && hasLoaded) {
-      fetchMovies(page + 1, selectedGenre, selectedLanguage);
+      fetchMovies(page + 1, selectedGenre, selectedLanguage, selectedCategory);
     }
-  }, [inView, loading, page, totalPages, fetchMovies, selectedGenre, selectedLanguage, hasLoaded]);
+  }, [inView, loading, page, totalPages, fetchMovies, selectedGenre, selectedLanguage, selectedCategory, hasLoaded]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground pt-5">
@@ -135,7 +182,7 @@ const Movies = () => {
             The Archive
           </div>
           <h2 className="text-3xl font-black tracking-tightest leading-none mb-6">
-            Curated<br/>Discovery
+            {selectedCategory ? selectedCategory.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Curated'}<br/>Discovery
           </h2>
         </div>
 

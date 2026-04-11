@@ -6,6 +6,7 @@ const initialState = {
     page: 1,
     genre: null,
     lang: null,
+    category: null,
     totalPages: 1,
     scrollPos: 0,
     hasLoaded: false
@@ -15,6 +16,7 @@ const initialState = {
     page: 1,
     genre: null,
     lang: null,
+    category: null,
     totalPages: 1,
     scrollPos: 0,
     hasLoaded: false
@@ -24,6 +26,15 @@ const initialState = {
     type: 'movie',
     results: [],
     page: 1,
+    totalPages: 1,
+    scrollPos: 0,
+    hasLoaded: false
+  },
+  platform: {
+    list: [],
+    page: 1,
+    genre: null,
+    lang: null,
     totalPages: 1,
     scrollPos: 0,
     hasLoaded: false
@@ -42,6 +53,9 @@ const exploreSlice = createSlice({
     },
     setSearchState: (state, action) => {
       state.search = { ...state.search, ...action.payload };
+    },
+    setPlatformState: (state, action) => {
+      state.platform = { ...state.platform, ...action.payload };
     },
     updateMoviesList: (state, action) => {
         const { list, page, totalPages } = action.payload;
@@ -83,11 +97,25 @@ const exploreSlice = createSlice({
         state.search.totalPages = totalPages;
         state.search.hasLoaded = true;
     },
+    updatePlatformList: (state, action) => {
+        const { list, page, totalPages } = action.payload;
+        if (page === 1) {
+            state.platform.list = list;
+        } else {
+            const existingIds = new Set(state.platform.list.map(m => m.id));
+            const newItems = list.filter(m => !existingIds.has(m.id));
+            state.platform.list = [...state.platform.list, ...newItems];
+        }
+        state.platform.page = page;
+        state.platform.totalPages = totalPages;
+        state.platform.hasLoaded = true;
+    },
     saveScrollPosition: (state, action) => {
       const { type, position } = action.payload;
       if (type === 'movie') state.movies.scrollPos = position;
       if (type === 'tv') state.tv.scrollPos = position;
       if (type === 'search') state.search.scrollPos = position;
+      if (type === 'platform') state.platform.scrollPos = position;
     },
     resetExploreState: (state, action) => {
       const { type } = action.payload;
@@ -102,9 +130,11 @@ export const {
   setMoviesState, 
   setTVState, 
   setSearchState,
+  setPlatformState,
   updateMoviesList, 
   updateTVList, 
   updateSearchList,
+  updatePlatformList,
   saveScrollPosition, 
   resetExploreState 
 } = exploreSlice.actions;

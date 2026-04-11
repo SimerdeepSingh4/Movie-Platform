@@ -1,5 +1,5 @@
 import { useAuth } from '../hooks/useAuth'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 
 const Protected = ({ children }) => {
     const { user, initialized } = useAuth()
@@ -19,7 +19,7 @@ const Protected = ({ children }) => {
         return <Navigate to="/login" replace />
     }
     
-    return children
+    return children || <Outlet />
 }
 
 export default Protected

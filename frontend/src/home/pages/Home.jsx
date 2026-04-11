@@ -163,40 +163,40 @@ const Home = () => {
         {(!loading || trending.length > 0) && !error && (
           <>
             {exclusive && exclusive.length > 0 && (
-              <MovieRow title="Exclusive Originals" movies={exclusive} />
+              <MovieRow title="Exclusive Originals" movies={exclusive} explorePath="/movies?category=exclusive" />
             )}
 
             <MovieRow
               title="Weekly Top Trending"
               movies={trending}
-              explorePath="/movies"
+              explorePath="/movies?category=trending"
             />
 
             <MovieRow
               title="Binge-worthy Series"
               movies={trendingTV}
-              explorePath="/tv"
+              explorePath="/tv?category=trending"
               mediaType="tv"
             />
 
             <MovieRow
               title="Critics' Highest Rated"
               movies={topRatedTV}
-              explorePath="/tv"
+              explorePath="/tv?category=top_rated"
               mediaType="tv"
             />
 
             <MovieRow
               title="Trending in India"
               movies={trendingIndia}
-              explorePath="/movies"
+              explorePath="/movies?category=trending_india"
               mediaType="movie"
             />
 
             <MovieRow
               title="All-Time Classics"
               movies={topRated}
-              explorePath="/movies"
+              explorePath="/movies?category=top_rated"
             />
 
             {/* OTT Platforms - Visual Separator */}
@@ -242,19 +242,19 @@ const Home = () => {
             {/* Genre-based Curated Lists */}
             <div className="space-y-4 md:space-y-8">
               {action.length > 0 && (
-                <MovieRow title="High Octane Action" movies={action} explorePath="/movies" />
+                <MovieRow title="High Octane Action" movies={action} explorePath="/movies?category=popular" />
               )}
               {comedy.length > 0 && (
-                <MovieRow title="Laughter Unlimited" movies={comedy} explorePath="/movies" />
+                <MovieRow title="Laughter Unlimited" movies={comedy} explorePath="/movies?category=popular" />
               )}
               {horror.length > 0 && (
-                <MovieRow title="Midnight Thrillers" movies={horror} explorePath="/movies" />
+                <MovieRow title="Midnight Thrillers" movies={horror} explorePath="/movies?category=popular" />
               )}
               {scifi.length > 0 && (
-                <MovieRow title="Future & Beyond" movies={scifi} explorePath="/movies" />
+                <MovieRow title="Future & Beyond" movies={scifi} explorePath="/movies?category=popular" />
               )}
               {anime.length > 0 && (
-                <MovieRow title="Masterpiece Anime" movies={anime} explorePath="/movies" />
+                <MovieRow title="Masterpiece Anime" movies={anime} explorePath="/movies?category=popular" />
               )}
             </div>
           </>

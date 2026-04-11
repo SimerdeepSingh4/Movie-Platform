@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React from 'react';
 import axios from 'axios';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';  
 import { useDispatch, useSelector } from 'react-redux';
 import { useInView } from 'react-intersection-observer';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,7 +43,10 @@ const LANGUAGES = [
 
 const TvShows = () => {
   const dispatch = useDispatch();
-  const { list: shows, page, totalPages, genre: selectedGenre, lang: selectedLanguage, scrollPos, hasLoaded } = useSelector(state => state.explore.tv);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlCategory = searchParams.get('category');
+
+  const { list: shows, page, totalPages, genre: selectedGenre, lang: selectedLanguage, category: selectedCategory, scrollPos, hasLoaded } = useSelector(state => state.explore.tv);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [genres, setGenres] = useState([]);
@@ -70,6 +75,13 @@ const TvShows = () => {
     };
   }, [dispatch]);
 
+  // Sync URL category with Redux state
+  useEffect(() => {
+    if (urlCategory !== selectedCategory) {
+      dispatch(setTVState({ category: urlCategory, page: 1, list: [], hasLoaded: false, genre: null, lang: null }));
+    }
+  }, [urlCategory, selectedCategory, dispatch]);
+
   // Restore scroll position after data is loaded
   useEffect(() => {
     if (shows.length > 0 && !hasRestoredScroll.current && scrollPos > 0) {
@@ -78,17 +90,23 @@ const TvShows = () => {
     }
   }, [shows, scrollPos]);
 
-  const fetchShows = useCallback(async (pageNum, genreId, langCode) => {
+  const fetchShows = useCallback(async (pageNum, genreId, langCode, category) => {
     setLoading(true);
     setError(null);
     try {
-      let endpoint = `${BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&page=${pageNum}&sort_by=popularity.desc`;
-      if (genreId) {
-        endpoint += `&with_genres=${genreId}`;
+      let endpoint;
+      if (category === 'trending') {
+        endpoint = `${BASE_URL}/trending/tv/day?api_key=${TMDB_API_KEY}&page=${pageNum}`;
+      } else if (category === 'top_rated') {
+        endpoint = `${BASE_URL}/tv/top_rated?api_key=${TMDB_API_KEY}&page=${pageNum}`;
+      } else if (category === 'popular') {
+        endpoint = `${BASE_URL}/tv/popular?api_key=${TMDB_API_KEY}&page=${pageNum}`;
+      } else {
+        endpoint = `${BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&page=${pageNum}&sort_by=popularity.desc`;
+        if (genreId) endpoint += `&with_genres=${genreId}`;
+        if (langCode) endpoint += `&with_original_language=${langCode}`;
       }
-      if (langCode) {
-        endpoint += `&with_original_language=${langCode}`;
-      }
+
       const res = await axios.get(endpoint);
 
       dispatch(updateTVList({
@@ -106,24 +124,32 @@ const TvShows = () => {
 
   // Handle Genre/Language changes
   const handleGenreChange = (genreId) => {
-    dispatch(setTVState({ genre: genreId, page: 1, list: [], hasLoaded: false }));
+    setSearchParams(prev => {
+      prev.delete('category');
+      return prev;
+    });
+    dispatch(setTVState({ genre: genreId, page: 1, list: [], hasLoaded: false, category: null }));
   };
 
   const handleLangChange = (langCode) => {
-    dispatch(setTVState({ lang: langCode, page: 1, list: [], hasLoaded: false }));
+    setSearchParams(prev => {
+      prev.delete('category');
+      return prev;
+    });
+    dispatch(setTVState({ lang: langCode, page: 1, list: [], hasLoaded: false, category: null }));
   };
 
   useEffect(() => {
     if (!hasLoaded) {
-      fetchShows(1, selectedGenre, selectedLanguage);
+      fetchShows(1, selectedGenre, selectedLanguage, selectedCategory);
     }
-  }, [selectedGenre, selectedLanguage, fetchShows, hasLoaded]);
+  }, [selectedGenre, selectedLanguage, selectedCategory, fetchShows, hasLoaded]);
 
   useEffect(() => {
     if (inView && !loading && page < totalPages && hasLoaded) {
-      fetchShows(page + 1, selectedGenre, selectedLanguage);
+      fetchShows(page + 1, selectedGenre, selectedLanguage, selectedCategory);
     }
-  }, [inView, loading, page, totalPages, fetchShows, selectedGenre, selectedLanguage, hasLoaded]);
+  }, [inView, loading, page, totalPages, fetchShows, selectedGenre, selectedLanguage, selectedCategory, hasLoaded]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground pt-5">
@@ -135,7 +161,7 @@ const TvShows = () => {
             The TV Archive
           </div>
           <h2 className="text-3xl font-black tracking-tightest leading-none mb-6">
-            Episodic<br/>Chronicles
+            {selectedCategory ? selectedCategory.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Episodic'}<br/>Chronicles
           </h2>
         </div>
 

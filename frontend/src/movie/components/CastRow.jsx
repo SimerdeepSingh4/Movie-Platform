@@ -1,79 +1,73 @@
-import React, { useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from "@/components/ui/carousel";
 
-const CastRow = ({ title, cast = [] }) => {
-  const scrollRef = useRef(null);
+const CastRow = memo(({ title, cast = [] }) => {
   const navigate = useNavigate();
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === 'left'
-        ? scrollLeft - clientWidth * 0.75
-        : scrollLeft + clientWidth * 0.75;
-
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
-  };
 
   if (!cast || cast.length === 0) return null;
 
   return (
-    <div className="py-6 container mx-auto px-4 relative group">
-      <div className="flex justify-between items-end mb-4">
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2>
+    <div className="py-8 relative group/row w-full overflow-hidden">
+      <div className="flex justify-between items-end mb-6 px-4 md:px-12">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl md:text-3xl font-black tracking-tighter text-foreground uppercase italic drop-shadow-sm">
+            {title}
+          </h2>
+          <div className="h-1 w-12 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
+        </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <Button
-        variant="secondary"
-        size="icon"
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 rounded-full opacity-0 group-hover:opacity-100 transition duration-300 hidden md:flex hover:bg-white hover:text-black"
-        onClick={() => scroll('left')}
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </Button>
-
-      <Button
-        variant="secondary"
-        size="icon"
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 rounded-full opacity-0 group-hover:opacity-100 transition duration-300 hidden md:flex hover:bg-white hover:text-black"
-        onClick={() => scroll('right')}
-      >
-        <ChevronRight className="h-6 w-6" />
-      </Button>
-
-      {/* Horizontal Scroll Area */}
-      <div
-        ref={scrollRef}
-        className="flex space-x-4 overflow-x-auto pb-6 scrollbar-hide snap-x"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {cast.slice(0, 15).map((actor, index) => (
-          actor.profile_path && (
-            <div 
-              key={`${actor.id}-${index}`} 
-              className="w-[180px] shrink-0 snap-start group/actor cursor-pointer"
-              onClick={() => navigate(`/person/${actor.id}`)}
-            >
-              <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted mb-3 relative">
-                <img
-                  src={`https://image.tmdb.org/t/p/w276_and_h350_face${actor.profile_path}`}
-                  alt={actor.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover/actor:scale-110"
-                  loading="lazy"
-                />
-              </div>
-              <p className="font-semibold text-sm leading-tight truncate px-1 group-hover/actor:text-primary transition-colors">{actor.name}</p>
-              <p className="text-xs text-muted-foreground truncate mt-1 px-1">{actor.character}</p>
-            </div>
-          )
-        ))}
+      <div className="px-4 md:px-12 relative">
+        <Carousel
+          opts={{
+            align: "start",
+            loop: false,
+            dragFree: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-4 pb-4">
+            {cast.slice(0, 20).map((actor, index) => (
+              actor.profile_path && (
+                <CarouselItem key={`${actor.id}-${index}`} className="pl-4 basis-auto">
+                  <div 
+                    className="w-[140px] md:w-[180px] group/actor cursor-pointer snap-start"
+                    onClick={() => navigate(`/person/${actor.id}`)}
+                  >
+                    <div className="aspect-[2/3] rounded-2xl overflow-hidden bg-muted mb-4 relative shadow-lg ring-1 ring-border/50 group-hover/actor:ring-primary/50 transition-all duration-500">
+                      <img
+                        src={`https://image.tmdb.org/t/p/w300${actor.profile_path}`}
+                        alt={actor.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover/actor:scale-110"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/actor:opacity-100 transition-opacity duration-500" />
+                    </div>
+                    <div className="px-1">
+                      <p className="font-black text-sm md:text-base leading-tight truncate group-hover/actor:text-primary transition-colors tracking-tight italic uppercase">{actor.name}</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground/70 font-bold truncate mt-1.5 uppercase tracking-widest">{actor.character}</p>
+                    </div>
+                  </div>
+                </CarouselItem>
+              )
+            ))}
+          </CarouselContent>
+          
+          <div className="hidden md:block">
+            <CarouselPrevious className="left-4 h-12 w-12 rounded-full border-border/20 bg-background/20 backdrop-blur-xl hover:bg-primary/20 hover:text-primary hover:border-primary/50 transition-all opacity-0 group-hover/row:opacity-100" />
+            <CarouselNext className="right-4 h-12 w-12 rounded-full border-border/20 bg-background/20 backdrop-blur-xl hover:bg-primary/20 hover:text-primary hover:border-primary/50 transition-all opacity-0 group-hover/row:opacity-100" />
+          </div>
+        </Carousel>
       </div>
     </div>
   );
-};
+});
 
 export default CastRow;
