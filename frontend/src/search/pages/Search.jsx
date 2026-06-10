@@ -240,7 +240,7 @@ const Search = () => {
               ))}
             </div>
           ) : results.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
+            <div className="grid grid-flow-row-dense grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
               {results.map((item, index) => {
                 let cardContent = null;
                 const isWide = (activeTab === 'movie' || activeTab === 'tv') && index % 14 === 7;
@@ -256,7 +256,7 @@ const Search = () => {
                       {...item}
                       mediaType={activeTab}
                       variant={isWide ? "wide" : "standard"}
-                      className="w-full"
+                      className={cn("w-full", isWide && "aspect-[7/5] sm:aspect-auto sm:h-full")}
                     />
                   );
                 } else if (activeTab === 'person') {

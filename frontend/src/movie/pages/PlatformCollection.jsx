@@ -300,18 +300,18 @@ const PlatformCollection = () => {
 
           {/* Grid Section */}
           <section>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+            <div className="grid grid-flow-row-dense grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
               {movies.map((movie, index) => {
                 // Feature variant every few items
                 const isWide = index % 14 === 7;
                 
                 return (
                   <React.Fragment key={`${movie.id}-${index}`}>
-                    <div className={cn(isWide ? "col-span-2" : "col-span-1")}>
+                    <div className={cn(isWide ? "col-span-2 h-full" : "col-span-1")}>
                       <MovieCard 
                         {...movie}
                         variant={isWide ? "wide" : "standard"}
-                        className="w-full"
+                        className={cn("w-full", isWide && "aspect-[7/5] sm:aspect-auto sm:h-full")}
                       />
                     </div>
                   </React.Fragment>

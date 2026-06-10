@@ -37,11 +37,8 @@ const MovieCard = memo(({
   const displayTitle = title || name || 'Untitled';
 
   const handleClick = () => {
-    if (user) {
-      navigate(`/${finalMediaType}/${cardId}${isInternal ? '?source=internal' : ''}`);
-    } else {
-      navigate('/login');
-    }
+    const isInternalQuery = isInternal ? '?source=internal' : '';
+    navigate(`/${finalMediaType}/${cardId}${isInternalQuery}`);
   };
 
   const imgUrl = (variant === 'wide' || variant === 'spotlight') && (backdrop_path || posterUrl)

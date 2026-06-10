@@ -68,12 +68,12 @@ export const router = createBrowserRouter([
                                 element: <MovieDetails />
                             },
                             {
-                                path: "platform/:providerId",
-                                element: <PlatformCollection />
-                            },
-                            {
                                 path: "tv/:id",
                                 element: <TvDetails />
+                            },
+                            {
+                                path: "platform/:providerId",
+                                element: <PlatformCollection />
                             },
                             {
                                 path: "person/:id",

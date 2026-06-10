@@ -4,8 +4,9 @@ import axios from 'axios';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Star, Clock, Calendar, Heart, Bookmark } from 'lucide-react';
+import { Play, Star, Clock, Calendar, Heart, Bookmark, Volume2, VolumeX } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 import MovieRow from '../../home/components/MovieRow';
 import CastRow from '../components/CastRow';
 import TrailerModal from '../components/TrailerModal';
@@ -14,6 +15,52 @@ import { toast } from 'sonner';
 import { formatDate, getFullCountryName, getFullLanguageName, formatRuntime } from '@/lib/utils';
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
+
+const extractYouTubeId = (url) => {
+  if (!url) return null;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+  return match ? match[1] : url.split('?')[0].split('&')[0].split('/').pop();
+};
+
+const getAmbientGlowColor = (genres) => {
+  if (!genres || genres.length === 0) return 'oklch(0.75 0.16 85)';
+  
+  const genreName = typeof genres === 'string'
+    ? genres.split(',')[0].trim().toLowerCase()
+    : genres[0]?.name?.trim().toLowerCase() || '';
+
+  switch (genreName) {
+    case 'action':
+    case 'adventure':
+    case 'war':
+      return 'oklch(0.65 0.22 25)';
+    case 'sci-fi':
+    case 'science fiction':
+    case 'fantasy':
+    case 'mystery':
+      return 'oklch(0.70 0.18 250)';
+    case 'drama':
+    case 'history':
+    case 'music':
+      return 'oklch(0.75 0.16 85)';
+    case 'horror':
+    case 'thriller':
+    case 'crime':
+      return 'oklch(0.55 0.20 30)';
+    case 'comedy':
+    case 'family':
+      return 'oklch(0.80 0.18 120)';
+    case 'romance':
+      return 'oklch(0.65 0.18 350)';
+    case 'animation':
+      return 'oklch(0.75 0.18 200)';
+    case 'documentary':
+    case 'western':
+      return 'oklch(0.60 0.08 70)';
+    default:
+      return 'oklch(0.75 0.16 85)';
+  }
+};
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -26,6 +73,107 @@ const MovieDetails = () => {
   const [isAddingWatchlist, setIsAddingWatchlist] = useState(false);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const { user } = useSelector((state) => state.auth);
+
+  // Video auto-play states
+  const [showVideo, setShowVideo] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [player, setPlayer] = useState(null);
+
+  // Load YouTube Iframe API on mount
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      if (firstScriptTag && firstScriptTag.parentNode) {
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      } else {
+        document.head.appendChild(tag);
+      }
+    }
+  }, []);
+
+  // Set up delay timer to display trailer in background
+  useEffect(() => {
+    setShowVideo(false);
+    setPlayer(null);
+    if (!movie) return;
+
+    const trailer = movie.videos?.results?.find(vid => vid.site === 'YouTube' && vid.type === 'Trailer') || movie.videos?.results?.[0];
+    if (!trailer) return;
+
+    const timer = setTimeout(() => {
+      setShowVideo(true);
+    }, 4000); // 4-second delay
+
+    return () => clearTimeout(timer);
+  }, [movie]);
+
+  // Initialize YT Player instance when iframe is mounted
+  useEffect(() => {
+    if (!showVideo || !movie) return;
+    
+    const trailer = movie.videos?.results?.find(vid => vid.site === 'YouTube' && vid.type === 'Trailer') || movie.videos?.results?.[0];
+    if (!trailer) return;
+
+    let ytPlayer = null;
+    const initPlayer = () => {
+      try {
+        ytPlayer = new window.YT.Player('details-youtube-player', {
+          events: {
+            onReady: (event) => {
+              // Read current state values instead of relying on dependencies
+              event.target.mute();
+              setPlayer(event.target);
+            },
+            onStateChange: (event) => {
+              if (event.data === window.YT.PlayerState.ENDED) {
+                event.target.playVideo();
+              }
+            }
+          }
+        });
+      } catch (e) {
+        console.error("Error creating YT Player", e);
+      }
+    };
+
+    const checkYT = setInterval(() => {
+      if (window.YT && window.YT.Player) {
+        clearInterval(checkYT);
+        initPlayer();
+      }
+    }, 200);
+
+    return () => {
+      clearInterval(checkYT);
+      // Instantly kill the video decoder by clearing the iframe src.
+      // We intentionally skip ytPlayer.destroy() because its heavy JavaScript teardown 
+      // blocks the main thread and causes severe lag when navigating to heavy pages like Home.
+      const iframe = document.getElementById('details-youtube-player');
+      if (iframe) {
+        iframe.src = 'about:blank';
+      }
+    };
+  }, [showVideo, movie]);
+
+  const handleToggleMute = (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (!player) return;
+    
+    if (isMuted) {
+      player.unMute();
+      player.setVolume(50);
+      player.playVideo();
+      setIsMuted(false);
+    } else {
+      player.mute();
+      setIsMuted(true);
+    }
+  };
 
   const fetchMovieDetails = useCallback(async () => {
     setLoading(true);
@@ -68,7 +216,7 @@ const MovieDetails = () => {
           },
           videos: localMovie.trailerUrl ? {
             results: [{
-              key: localMovie.trailerUrl.split('v=')[1] || localMovie.trailerUrl.split('/').pop(),
+              key: extractYouTubeId(localMovie.trailerUrl),
               site: 'YouTube',
               type: 'Trailer'
             }]
@@ -295,20 +443,77 @@ const MovieDetails = () => {
   const rentProviders = deduplicateProviders(watchProviders.rent);
   const buyProviders = deduplicateProviders(watchProviders.buy);
 
+  const ambientColor = getAmbientGlowColor(movie.genres || movie.genre);
+
   return (
-    <div className="min-h-screen pb-16 bg-background text-foreground">
+    <div className="min-h-screen pb-16 bg-background text-foreground relative overflow-hidden">
+      {/* Ambient Ambilight Backlight Layer */}
+      <div className="absolute top-0 left-0 w-full h-[1200px] pointer-events-none overflow-hidden -z-10 opacity-[0.12] select-none">
+        <div 
+          className="absolute -top-[10%] left-1/2 -translate-x-1/2 w-[140%] aspect-square rounded-full blur-[160px] transition-all duration-1000"
+          style={{
+            background: `radial-gradient(circle, ${ambientColor} 0%, transparent 60%)`
+          }}
+        />
+      </div>
+
       {/* Hero Banner Area */}
       <div className="relative h-[70vh] md:h-[85vh] w-full overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 z-0">
-          <img
-            src={backdropUrl}
-            alt={movie.title}
-            className="w-full h-full object-cover"
-          />
-          {/* Main Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent z-10" />
-          <div className="absolute inset-0 bg-black/20 z-10" />
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={movie.id}
+            initial={{ opacity: 0, scale: 1.02 }}
+            animate={{ opacity: 1, scale: 1.02 }}
+            exit={{ opacity: 0, scale: 1.02 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+            className="absolute inset-0 z-0 origin-center"
+          >
+            {/* Background Image with Ken Burns Zoom */}
+            <motion.img
+              src={backdropUrl}
+              alt={movie.title}
+              initial={{ scale: 1 }}
+              animate={{ scale: 1.15 }}
+              transition={{ 
+                duration: 45, 
+                ease: "linear",
+                repeat: Infinity,
+                repeatType: "reverse"
+              }}
+              className="w-full h-full object-cover"
+            />
+
+            {/* Active Video Trailer Layer */}
+            {showVideo && trailerVideo && (
+              <motion.div
+                initial={{ opacity: 0, scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1.02 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0 z-0 overflow-hidden bg-background flex items-center justify-center"
+              >
+                <iframe
+                  id="details-youtube-player"
+                  src={`https://www.youtube.com/embed/${trailerVideo.key}?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerVideo.key}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&modestbranding=1`}
+                  className="pointer-events-none shrink-0"
+                  style={{
+                    width: '105vw',
+                    height: '59.06vw',
+                    minWidth: '158.66vh',
+                    minHeight: '89.25vh',
+                    border: 'none'
+                  }}
+                  allow="autoplay; encrypted-media"
+                  title="Trailer"
+                />
+              </motion.div>
+            )}
+
+            {/* Main Gradients */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent z-10" />
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background via-background/90 to-transparent z-20" />
+            <div className="absolute inset-0 bg-black/20 z-10" />
+          </motion.div>
+        </AnimatePresence>
 
         {/* Central Play Button */}
         {trailerVideo && (
@@ -333,6 +538,22 @@ const MovieDetails = () => {
             <p className="font-extrabold text-xl mb-1 text-white">{formatDate(movie.release_date)}</p>
           </div>
         ) : null}
+
+        {/* Volume/Mute Controller */}
+        {showVideo && player && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleToggleMute}
+            className="absolute bottom-[25vh] md:bottom-32 right-6 md:right-12 z-50 h-12 w-12 rounded-full border border-white/20 bg-black/40 backdrop-blur-md hover:bg-black/60 text-white transition-all scale-90 md:scale-100 shadow-2xl"
+          >
+            {isMuted ? (
+              <VolumeX className="h-5 w-5" />
+            ) : (
+              <Volume2 className="h-5 w-5 text-primary" />
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Content Container (Overlapping Hero) */}
