@@ -23,12 +23,12 @@ const HeroSection = () => {
   const [trailerVideoId, setTrailerVideoId] = useState(null);
   const [fetchingTrailer, setFetchingTrailer] = useState(false);
 
-  // Video autoplay states
   const [showVideo, setShowVideo] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [player, setPlayer] = useState(null);
 
   const [movieIndex, setMovieIndex] = useState(0);
+  const [triggerNextMovie, setTriggerNextMovie] = useState(0);
 
   // Load YouTube Iframe API on mount
   useEffect(() => {
@@ -45,27 +45,38 @@ const HeroSection = () => {
     const combinedTrending = [...(trending || []), ...(trendingTV || [])];
     if (combinedTrending.length === 0) return;
 
-    if (!movie) {
-      const initialIndex = Math.floor(Math.random() * Math.min(20, combinedTrending.length));
-      setMovieIndex(initialIndex);
-      setMovie(combinedTrending[initialIndex]);
-    }
-
-    const interval = setInterval(() => {
+    const switchMovie = () => {
       setMovieIndex((prevIndex) => {
         let nextIndex;
-        do {
-          nextIndex = Math.floor(Math.random() * Math.min(20, combinedTrending.length));
-        } while (nextIndex === prevIndex && combinedTrending.length > 1);
+        if (combinedTrending.length > 1) {
+          do {
+            nextIndex = Math.floor(Math.random() * Math.min(20, combinedTrending.length));
+          } while (nextIndex === prevIndex);
+        } else {
+          nextIndex = 0;
+        }
         
         setMovie(combinedTrending[nextIndex]);
         setTrailerVideoId(null);
         return nextIndex;
       });
-    }, 45000);
+    };
 
+    if (!movie) {
+      switchMovie();
+      return;
+    }
+
+    if (triggerNextMovie > 0) {
+      switchMovie();
+      // Reset trigger to 0 so we don't immediately trigger again on next render
+      setTriggerNextMovie(0);
+      return;
+    }
+
+    const interval = setInterval(switchMovie, 45000);
     return () => clearInterval(interval);
-  }, [trending, trendingTV, movie]);
+  }, [trending, trendingTV, triggerNextMovie]); // Decoupled from `movie` so long trailers don't reset the timer incorrectly
 
   // Fetch trailer for backdrop
   useEffect(() => {
@@ -125,7 +136,10 @@ const HeroSection = () => {
             },
             onStateChange: (event) => {
               if (event.data === window.YT.PlayerState.ENDED) {
-                event.target.playVideo();
+                // Gracefully fade out the video when it finishes
+                setShowVideo(false);
+                // Trigger a movie switch after the fade-out animation completes
+                setTimeout(() => setTriggerNextMovie(Date.now()), 1500);
               }
             }
           }
@@ -239,7 +253,7 @@ const HeroSection = () => {
             >
               <iframe
                 id="hero-youtube-player"
-                src={`https://www.youtube.com/embed/${trailerVideoId}?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerVideoId}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&modestbranding=1`}
+                src={`https://www.youtube.com/embed/${trailerVideoId}?enablejsapi=1&autoplay=1&mute=1&controls=0&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&modestbranding=1`}
                 className="pointer-events-none shrink-0"
                 style={{
                   width: '105vw',

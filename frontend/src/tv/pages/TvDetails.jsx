@@ -129,7 +129,8 @@ const TvDetails = () => {
             },
             onStateChange: (event) => {
               if (event.data === window.YT.PlayerState.ENDED) {
-                event.target.playVideo();
+                // Gracefully fade out the video when it finishes
+                setShowVideo(false);
               }
             }
           }
@@ -477,7 +478,7 @@ const TvDetails = () => {
               >
                 <iframe
                   id="details-youtube-player"
-                  src={`https://www.youtube.com/embed/${trailerVideo.key}?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerVideo.key}&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&modestbranding=1`}
+                  src={`https://www.youtube.com/embed/${trailerVideo.key}?enablejsapi=1&autoplay=1&mute=1&controls=0&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&modestbranding=1`}
                   className="pointer-events-none shrink-0"
                   style={{
                     width: '105vw',
