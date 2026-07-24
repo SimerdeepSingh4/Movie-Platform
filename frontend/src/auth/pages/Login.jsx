@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff } from "lucide-react";
 import {
@@ -20,6 +20,8 @@ import { useAuth } from "../hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from;
   
   const { handleLogin, user, initialized } = useAuth()
   const [email, setEmail] = useState("")
@@ -76,13 +78,14 @@ const Login = () => {
 
   useEffect(() => {
     if (user && initialized) {
-      navigate(user.role === 'admin' ? '/admin' : '/');
+      const destination = from || (user.role === 'admin' ? '/admin' : '/');
+      navigate(destination, { replace: true });
     }
-  }, [user, initialized, navigate]);
+  }, [user, initialized, navigate, from]);
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    handleLogin(email, password)
+    handleLogin(email, password, from)
   }
 
   if (!initialized) {
@@ -189,7 +192,7 @@ const Login = () => {
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Don't have an account?{' '}
-              <Link to="/register" className="font-semibold text-primary hover:underline underline-offset-4">
+              <Link to="/register" state={{ from: location.state?.from || location.state }} className="font-semibold text-primary hover:underline underline-offset-4">
                 Sign up
               </Link>
             </div>

@@ -268,11 +268,10 @@ const HeroSection = () => {
             </motion.div>
           )}
           
-          {/* Advanced Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/10 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent z-10" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background via-background/90 to-transparent z-20" />
-          <div className="absolute inset-0 bg-black/20 z-0" /> 
+          {/* Premium Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/70 to-transparent z-10" />
+          <div className="absolute inset-0 bg-black/10 z-0" />
         </motion.div>
       </AnimatePresence>
 
@@ -287,53 +286,53 @@ const HeroSection = () => {
           className="container mx-auto px-4 md:px-12 z-20 relative"
         >
           <div className="max-w-4xl">
-            <div className="flex items-center flex-wrap gap-4 mb-6">
-              <Badge variant="default" className="bg-primary/20 backdrop-blur-md text-primary border border-primary/20 text-xs md:text-sm px-4 py-1.5 font-black uppercase tracking-widest">
+            <div className="flex items-center flex-wrap gap-4 mb-4">
+              <Badge variant="default" className="bg-primary/15 backdrop-blur-md text-primary border border-primary/20 text-xs md:text-sm px-4 py-1.5 font-medium tracking-wide">
                 {movie?.mediaType === 'tv' ? 'Featured Series' : 'Featured Movie'}
               </Badge>
 
-              <div className="flex items-center gap-2 text-yellow-500 font-black bg-black/60 px-3 py-1.5 rounded-full backdrop-blur-xl border border-white/10 shadow-xl">
+              <div className="flex items-center gap-1.5 text-yellow-500 font-medium bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/10">
                 <Star className="h-4 w-4 fill-current" />
                 <span className="text-sm">{rating}</span>
               </div>
 
               {releaseDate && (
-                <span className="text-sm font-black text-foreground/70 bg-white/5 px-3 py-1.5 rounded-full backdrop-blur-xl border border-white/5 uppercase tracking-widest">
+                <span className="text-sm font-medium text-foreground/80 bg-white/5 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/10 tracking-wide">
                   {releaseDate.substring(0, 4)}
                 </span>
               )}
             </div>
 
-            <h1 className="text-6xl md:text-8xl font-black tracking-tightest mb-6 text-foreground drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] line-clamp-2 uppercase italic leading-[0.9]">
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-5 text-foreground drop-shadow-lg line-clamp-2 leading-[1.1]">
               {title}
             </h1>
             
-            <p className="text-lg md:text-xl text-foreground/70 mb-10 line-clamp-3 leading-relaxed max-w-2xl font-medium border-l-2 border-primary/30 pl-6">
+            <p className="text-lg md:text-xl text-foreground/80 mb-8 line-clamp-3 leading-relaxed max-w-2xl font-normal drop-shadow-md">
               {movie.overview}
             </p>
 
-            <div className="flex flex-nowrap gap-3 md:gap-6 items-center">
+            <div className="flex flex-nowrap gap-4 md:gap-5 items-center">
               <Button 
                 size="lg" 
-                className="h-12 md:h-14 flex-1 md:flex-none px-4 md:px-10 font-black uppercase tracking-widest text-[10px] md:text-sm gap-2 md:gap-3 rounded-full shadow-2xl shadow-primary/40 transition-all active:scale-95 bg-primary text-primary-foreground group"
+                className="h-12 md:h-14 flex-1 md:flex-none px-6 md:px-8 font-semibold tracking-wide text-sm gap-2 rounded-full transition-all hover:scale-105 active:scale-95 bg-primary text-primary-foreground group shadow-lg shadow-primary/25"
                 onClick={handleWatchTrailer}
                 disabled={fetchingTrailer}
               >
                 {fetchingTrailer ? (
-                   <div className="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-b-2 border-white"></div>
+                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
                 ) : (
-                   <Play className="h-5 w-5 md:h-6 md:w-6 fill-current" />
+                   <Play className="h-5 w-5 fill-current transition-transform group-hover:scale-110" />
                 )}
-                <span className="truncate">Watch Trailer</span>
+                <span>Watch Trailer</span>
               </Button>
 
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="h-12 md:h-14 flex-1 md:flex-none px-4 md:px-10 font-black uppercase tracking-widest text-[10px] md:text-sm gap-2 md:gap-3 rounded-full backdrop-blur-md bg-white/5 hover:bg-white/10 transition-all active:scale-95 border-white/10"
+                className="h-12 md:h-14 flex-1 md:flex-none px-6 md:px-8 font-semibold tracking-wide text-sm gap-2 rounded-full backdrop-blur-md bg-white/5 hover:bg-white/15 transition-all active:scale-95 border-white/20 text-white"
                 onClick={handleMoreDetails}
               >
-                <Info className="h-5 w-5 md:h-6 md:w-6" /> <span className="truncate">Details</span>
+                <Info className="h-5 w-5" /> <span>Details</span>
               </Button>
             </div>
           </div>

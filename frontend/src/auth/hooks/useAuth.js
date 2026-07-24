@@ -11,7 +11,7 @@ export const useAuth = () => {
   // Reactively grab the auth state from our Redux Toolkit store
   const { user, loading, initialized, error } = useSelector((state) => state.auth);
 
-  async function handleLogin(email, password) {
+  async function handleLogin(email, password, redirectTo) {
     dispatch(setLoading(true));
     dispatch(setError(""));
     try {
@@ -21,11 +21,9 @@ export const useAuth = () => {
       dispatch(setUser(nextUser));
       dispatch(setInitialized(true));
       
-      dispatch(setUser(nextUser));
-      dispatch(setInitialized(true));
-      
       toast.success("Login successful! Welcome back.");
-      navigate("/");
+      const destination = redirectTo || (nextUser?.role === 'admin' ? '/admin' : '/');
+      navigate(destination);
     } catch (err) {
       const message = err?.response?.data?.message || "Login failed";
       dispatch(setError(message));
@@ -35,7 +33,7 @@ export const useAuth = () => {
     }
   }
 
-  async function handleRegister(username, email, password) {
+  async function handleRegister(username, email, password, redirectTo) {
     dispatch(setLoading(true));
     dispatch(setError(""));
     try {
@@ -44,11 +42,10 @@ export const useAuth = () => {
       
       dispatch(setUser(nextUser));
       dispatch(setInitialized(true));
-      dispatch(setUser(nextUser));
-      dispatch(setInitialized(true));
       
       toast.success("Account created successfully!");
-      navigate("/");
+      const destination = redirectTo || (nextUser?.role === 'admin' ? '/admin' : '/');
+      navigate(destination);
     } catch (err) {
       const message = err?.response?.data?.message || "Registration failed";
       dispatch(setError(message));

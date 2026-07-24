@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff } from "lucide-react";
 import {
@@ -20,6 +20,9 @@ import { useAuth } from "../hooks/useAuth";
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from;
+
   const { handleRegister, user, initialized } = useAuth();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -28,13 +31,14 @@ const Register = () => {
 
   useEffect(() => {
     if (user && initialized) {
-      navigate(user.role === 'admin' ? '/admin' : '/');
+      const destination = from || (user.role === 'admin' ? '/admin' : '/');
+      navigate(destination, { replace: true });
     }
-  }, [user, initialized, navigate]);
+  }, [user, initialized, navigate, from]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    handleRegister(username, email, password);
+    handleRegister(username, email, password, from);
   };
 
   useGSAP(() => {
@@ -198,7 +202,7 @@ const Register = () => {
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-primary hover:underline underline-offset-4">
+              <Link to="/login" state={{ from: location.state?.from || location.state }} className="font-semibold text-primary hover:underline underline-offset-4">
                 Log In
               </Link>
             </div>

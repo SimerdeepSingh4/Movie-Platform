@@ -1,8 +1,9 @@
 import { useAuth } from '../hooks/useAuth'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 const Protected = ({ children }) => {
     const { user, initialized } = useAuth()
+    const location = useLocation()
 
     if (!initialized) {
         return (
@@ -16,7 +17,7 @@ const Protected = ({ children }) => {
     }
 
     if (!user) {
-        return <Navigate to="/login" replace />
+        return <Navigate to="/login" state={{ from: location }} replace />
     }
     
     return children || <Outlet />

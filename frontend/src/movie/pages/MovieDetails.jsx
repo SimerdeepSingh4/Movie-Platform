@@ -98,6 +98,7 @@ const MovieDetails = () => {
     setShowVideo(false);
     setPlayer(null);
     if (!movie) return;
+    if (isTrailerOpen) return;
 
     const trailer = movie.videos?.results?.find(vid => vid.site === 'YouTube' && vid.type === 'Trailer') || movie.videos?.results?.[0];
     if (!trailer) return;
@@ -107,7 +108,7 @@ const MovieDetails = () => {
     }, 4000); // 4-second delay
 
     return () => clearTimeout(timer);
-  }, [movie]);
+  }, [movie, isTrailerOpen]);
 
   // Initialize YT Player instance when iframe is mounted
   useEffect(() => {
