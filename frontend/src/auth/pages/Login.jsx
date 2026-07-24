@@ -17,6 +17,32 @@ import { Label } from "@/components/ui/label";
 import logo from "../../../public/favicon.svg"
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import axios from "axios";
+
+const STATIC_POSTERS_1 = [
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC19.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC9.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC18.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC4.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg"
+];
+const STATIC_POSTERS_2 = [
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC14.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC7.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC28.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC13.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC23.jpg"
+];
+const STATIC_POSTERS_3 = [
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC18.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC3.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC22.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
+  "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC17.jpg"
+];
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,6 +53,38 @@ const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+
+  const [dynamicPosters, setDynamicPosters] = useState({
+    col1: STATIC_POSTERS_1,
+    col2: STATIC_POSTERS_2,
+    col3: STATIC_POSTERS_3
+  });
+
+  useEffect(() => {
+    const fetchTrendingPosters = async () => {
+      try {
+        const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        if (!TMDB_API_KEY) return;
+        
+        const response = await axios.get(`${BASE_URL}/trending/movie/week?api_key=${TMDB_API_KEY}`);
+        const movies = response.data.results || [];
+        
+        if (movies.length >= 18) {
+          const fetchedUrls = movies.map(m => `https://image.tmdb.org/t/p/w500${m.poster_path}`);
+          setDynamicPosters({
+            col1: fetchedUrls.slice(0, 6),
+            col2: fetchedUrls.slice(6, 12),
+            col3: fetchedUrls.slice(12, 18)
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch dynamic posters from TMDB:", err);
+      }
+    };
+
+    fetchTrendingPosters();
+  }, []);
 
   useGSAP(() => {
     if (!initialized) return;
@@ -51,30 +109,6 @@ const Login = () => {
       }
     );
   }, [initialized])
-  const posters = [
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC19.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC9.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC18.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC4.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg"
-  ];
-  const posters2 = [
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC14.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC7.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC28.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC13.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC23.jpg"
-  ];
-  const posters3 = [
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC18.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC3.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC11.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC22.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC1.jpg",
-    "https://ik.imagekit.io/dhyh95euj/movie%20posters/PC17.jpg"
-  ];
 
   useEffect(() => {
     if (user && initialized) {
@@ -106,7 +140,7 @@ const Login = () => {
 
       <div className="absolute left-0 top-0 w-[45%] lg:w-[50%] h-screen lg:flex hidden overflow-hidden gap-4 p-4 z-10 ">
         <div className="move flex flex-col gap-4 w-1/3 h-max pb-4">
-          {[...posters, ...posters].map((src, i) => (
+          {[...dynamicPosters.col1, ...dynamicPosters.col1].map((src, i) => (
             <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
               <img className="w-full h-full object-cover" src={src} />
             </div>
@@ -114,7 +148,7 @@ const Login = () => {
         </div>
         <div className="move2 flex flex-col gap-4 w-1/3 h-max pb-4">
 
-          {[...posters2, ...posters2].map((src, i) => (
+          {[...dynamicPosters.col2, ...dynamicPosters.col2].map((src, i) => (
             <div key={i} className="marque2 shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
               <img className="w-full h-full object-cover" src={src} />
             </div>
@@ -122,11 +156,11 @@ const Login = () => {
 
         </div>
         <div className="move flex flex-col gap-4 w-1/3 h-max pb-4">
-          {[...posters3, ...posters3].map((src, i) => (
-    <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
-      <img className="w-full h-full object-cover" src={src} />
-    </div>
-  ))}
+          {[...dynamicPosters.col3, ...dynamicPosters.col3].map((src, i) => (
+            <div key={i} className="marque shrink-0 rounded-xl overflow-hidden shadow-2xl aspect-[2/3]">
+              <img className="w-full h-full object-cover" src={src} />
+            </div>
+          ))}
         </div>
       </div>
 
