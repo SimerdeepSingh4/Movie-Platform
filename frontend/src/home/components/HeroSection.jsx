@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import TrailerModal from '../../movie/components/TrailerModal';
 import { toast } from 'sonner';
+import { useInView } from 'react-intersection-observer';
 
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
@@ -17,6 +18,11 @@ const HeroSection = () => {
   const { user } = useSelector((state) => state.auth);
   const [movie, setMovie] = useState(null);
   const navigate = useNavigate();
+
+  // Track if hero is in the viewport to stop background video when scrolled away
+  const { ref: containerRef, inView } = useInView({
+    threshold: 0.15,
+  });
 
   // Trailer states
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
@@ -103,18 +109,63 @@ const HeroSection = () => {
     fetchTrailerForBackdrop();
   }, [movie]);
 
-  // Set up delay timer to display trailer in background
+  // Reset video state when active movie or trailer changes
   useEffect(() => {
     setShowVideo(false);
     setPlayer(null);
+  }, [movie?.id, trailerVideoId]);
+
+  // Set up delay timer to display trailer in background (only when in view and not already started)
+  useEffect(() => {
     if (!movie || !trailerVideoId) return;
+    if (showVideo) return; // Video already active; keep playing and do not restart
+    if (!inView) return; // Do not start while scrolled out of view
 
     const timer = setTimeout(() => {
       setShowVideo(true);
     }, 4000); // 4-second delay
 
     return () => clearTimeout(timer);
-  }, [movie, trailerVideoId]);
+  }, [movie?.id, trailerVideoId, inView, showVideo]);
+
+  const [modalTrailerActive, setModalTrailerActive] = useState(false);
+
+  // Listen to modal trailer events across the app to pause hero background video
+  useEffect(() => {
+    const handleModalTrailer = (e) => {
+      setModalTrailerActive(!!e.detail?.playing);
+    };
+    window.addEventListener('modal-trailer-playing', handleModalTrailer);
+    return () => window.removeEventListener('modal-trailer-playing', handleModalTrailer);
+  }, []);
+
+  // Pause trailer when scrolled out of view OR when trailer modal is open, resume when back in view
+  useEffect(() => {
+    const iframe = document.getElementById('hero-youtube-player');
+    const shouldPause = !inView || isTrailerOpen || modalTrailerActive;
+
+    if (shouldPause) {
+      if (player && typeof player.pauseVideo === 'function') {
+        try { player.pauseVideo(); } catch (e) {}
+      }
+      if (iframe?.contentWindow) {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: '' }), '*');
+        } catch (e) {}
+      }
+    } else {
+      if (showVideo) {
+        if (player && typeof player.playVideo === 'function') {
+          try { player.playVideo(); } catch (e) {}
+        }
+        if (iframe?.contentWindow) {
+          try {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: '' }), '*');
+          } catch (e) {}
+        }
+      }
+    }
+  }, [inView, isTrailerOpen, modalTrailerActive, player, showVideo]);
 
   // Initialize YT Player instance when iframe is mounted
   useEffect(() => {
@@ -218,7 +269,7 @@ const HeroSection = () => {
         : (movie.posterUrl || (movie.poster_path ? `https://image.tmdb.org/t/p/w1280${movie.poster_path}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoWcWg0E8pSjBNi0TtiZsqu8uD2PAr_K11DA&s')));
 
   return (
-    <div className="relative h-[85vh] md:h-[90vh] w-full flex items-center justify-start overflow-hidden pt-72 md:pt-46">
+    <div ref={containerRef} className="relative h-[85vh] md:h-[90vh] w-full flex items-center justify-start overflow-hidden pt-72 md:pt-46">
       <AnimatePresence mode="wait">
         <motion.div 
           key={movie.id}

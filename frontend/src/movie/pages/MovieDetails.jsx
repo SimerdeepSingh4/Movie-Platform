@@ -13,6 +13,7 @@ import TrailerModal from '../components/TrailerModal';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import { formatDate, getFullCountryName, getFullLanguageName, formatRuntime } from '@/lib/utils';
+import { useInView } from 'react-intersection-observer';
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -74,6 +75,11 @@ const MovieDetails = () => {
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
+  // Track if hero banner is in viewport to stop trailer when scrolled away
+  const { ref: heroRef, inView } = useInView({
+    threshold: 0.15,
+  });
+
   // Video auto-play states
   const [showVideo, setShowVideo] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -93,12 +99,17 @@ const MovieDetails = () => {
     }
   }, []);
 
-  // Set up delay timer to display trailer in background
+  // Reset video state when movie changes or trailer modal opens
   useEffect(() => {
     setShowVideo(false);
     setPlayer(null);
-    if (!movie) return;
-    if (isTrailerOpen) return;
+  }, [movie?._id, movie?.id, isTrailerOpen]);
+
+  // Set up delay timer to display trailer in background (only when in view and not already started)
+  useEffect(() => {
+    if (!movie || isTrailerOpen) return;
+    if (showVideo) return; // Video already active; keep playing and do not restart
+    if (!inView) return; // Do not start while scrolled out of view
 
     const trailer = movie.videos?.results?.find(vid => vid.site === 'YouTube' && vid.type === 'Trailer') || movie.videos?.results?.[0];
     if (!trailer) return;
@@ -108,7 +119,46 @@ const MovieDetails = () => {
     }, 4000); // 4-second delay
 
     return () => clearTimeout(timer);
-  }, [movie, isTrailerOpen]);
+  }, [movie?._id, movie?.id, isTrailerOpen, inView, showVideo]);
+
+  const [modalTrailerActive, setModalTrailerActive] = useState(false);
+
+  // Listen to modal trailer events across the app to pause details background video
+  useEffect(() => {
+    const handleModalTrailer = (e) => {
+      setModalTrailerActive(!!e.detail?.playing);
+    };
+    window.addEventListener('modal-trailer-playing', handleModalTrailer);
+    return () => window.removeEventListener('modal-trailer-playing', handleModalTrailer);
+  }, []);
+
+  // Pause trailer when scrolled out of view OR when trailer modal is open, resume when back in view
+  useEffect(() => {
+    const iframe = document.getElementById('details-youtube-player');
+    const shouldPause = !inView || isTrailerOpen || modalTrailerActive;
+
+    if (shouldPause) {
+      if (player && typeof player.pauseVideo === 'function') {
+        try { player.pauseVideo(); } catch (e) {}
+      }
+      if (iframe?.contentWindow) {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: '' }), '*');
+        } catch (e) {}
+      }
+    } else {
+      if (showVideo) {
+        if (player && typeof player.playVideo === 'function') {
+          try { player.playVideo(); } catch (e) {}
+        }
+        if (iframe?.contentWindow) {
+          try {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: '' }), '*');
+          } catch (e) {}
+        }
+      }
+    }
+  }, [inView, isTrailerOpen, modalTrailerActive, player, showVideo]);
 
   // Initialize YT Player instance when iframe is mounted
   useEffect(() => {
@@ -460,7 +510,7 @@ const MovieDetails = () => {
       </div>
 
       {/* Hero Banner Area */}
-      <div className="relative h-[70vh] md:h-[85vh] w-full overflow-hidden flex items-center justify-center">
+      <div ref={heroRef} className="relative h-[70vh] md:h-[85vh] w-full overflow-hidden flex items-center justify-center">
         <AnimatePresence mode="wait">
           <motion.div 
             key={movie.id}
@@ -564,13 +614,12 @@ const MovieDetails = () => {
           {/* Poster & Title Row (Mobile optimization) */}
           <div className="flex flex-row md:flex-col gap-4 md:gap-0 w-full md:w-auto items-start md:items-start relative">
             {/* Floating Poster */}
-            <div className="shrink-0 w-[120px] sm:w-[150px] md:w-[220px] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 -mt-10 md:-mt-12 uppercase group relative">
+            <div className="shrink-0 w-[120px] sm:w-[150px] md:w-[220px] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 -mt-10 md:-mt-12 uppercase">
               <img
                 src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoWcWg0E8pSjBNi0TtiZsqu8uD2PAr_K11DA&s'}
                 alt={movie.title}
                 className="w-full h-auto object-cover"
               />
-              <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>
 
             {/* Title & Metadata for Mobile (Hidden on Desktop) */}

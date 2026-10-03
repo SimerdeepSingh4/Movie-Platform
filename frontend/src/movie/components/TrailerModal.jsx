@@ -7,6 +7,28 @@ import { toast } from 'sonner';
 const TrailerModal = ({ isOpen, onClose, videoId, movieId, mediaType = 'movie' }) => {
   const [hasTracked, setHasTracked] = useState(false);
 
+  // Notify background players (Hero, MovieDetails, TvDetails) to pause while modal trailer is active
+  useEffect(() => {
+    if (isOpen) {
+      window.dispatchEvent(new CustomEvent('modal-trailer-playing', { detail: { playing: true } }));
+      return () => {
+        window.dispatchEvent(new CustomEvent('modal-trailer-playing', { detail: { playing: false } }));
+      };
+    }
+  }, [isOpen]);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     // Reset tracking flag when modal opens for a new video
     if (isOpen) {
@@ -40,33 +62,33 @@ const TrailerModal = ({ isOpen, onClose, videoId, movieId, mediaType = 'movie' }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 gpu-accelerated">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-6 md:p-8 animate-in fade-in duration-200">
       <div 
         className="absolute inset-0 z-0" 
         onClick={onClose} 
         aria-label="Close modal background"
       />
-      <div className="relative z-10 w-full max-w-4xl bg-black rounded-lg overflow-hidden shadow-2xl border border-white/10 aspect-video md:h-[450px]">
+      <div className="relative z-10 w-full max-w-5xl bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-white/15 aspect-video">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={onClose} 
-          className="absolute top-2 right-2 z-20 bg-black/50 hover:bg-black/80 text-white rounded-full h-8 w-8"
+          className="absolute top-3 right-3 z-20 bg-black/60 hover:bg-black/90 text-white rounded-full h-9 w-9 backdrop-blur-sm transition-all hover:scale-110 active:scale-95 border border-white/10"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </Button>
         {videoId ? (
           <iframe
-            className="w-full h-full"
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
+            className="w-full h-full border-0 block"
+            src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&rel=0&iv_load_policy=3&modestbranding=1`}
             title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
+            loading="eager"
           ></iframe>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white bg-black">
-            <p>Trailer not available.</p>
+            <p className="text-muted-foreground text-sm font-medium">Trailer not available.</p>
           </div>
         )}
       </div>

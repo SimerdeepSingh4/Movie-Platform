@@ -44,7 +44,7 @@ const MovieRow = memo(({ title, movies = [], explorePath = null, mediaType }) =>
           opts={{
             align: "start",
             loop: false,
-            dragFree: true,
+            slidesToScroll: "auto",
           }}
           className="w-full"
         >
@@ -62,10 +62,8 @@ const MovieRow = memo(({ title, movies = [], explorePath = null, mediaType }) =>
             ))}
           </CarouselContent>
           
-          <div className="hidden md:block">
-            <CarouselPrevious className="left-4 h-12 w-12 rounded-full border-border/20 bg-background/20 backdrop-blur-xl hover:bg-primary/20 hover:text-primary hover:border-primary/50 transition-all opacity-0 hover:opacity-100" />
-            <CarouselNext className="right-4 h-12 w-12 rounded-full border-border/20 bg-background/20 backdrop-blur-xl hover:bg-primary/20 hover:text-primary hover:border-primary/50 transition-all opacity-0 hover:opacity-100" />
-          </div>
+          <CarouselPrevious variant="edge" />
+          <CarouselNext variant="edge" />
         </Carousel>
       </div>
     </div>

@@ -13,6 +13,7 @@ import TrailerModal from '../../movie/components/TrailerModal';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import { formatDate, getFullCountryName, getFullLanguageName } from '@/lib/utils';
+import { useInView } from 'react-intersection-observer';
 
 const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -75,6 +76,11 @@ const TvDetails = () => {
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const { user } = useSelector((state) => state.auth);
 
+  // Track if hero banner is in viewport to stop trailer when scrolled away
+  const { ref: heroRef, inView } = useInView({
+    threshold: 0.15,
+  });
+
   // Video auto-play states
   const [showVideo, setShowVideo] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -94,12 +100,17 @@ const TvDetails = () => {
     }
   }, []);
 
-  // Set up delay timer to display trailer in background
+  // Reset video state when show changes or trailer modal opens
   useEffect(() => {
     setShowVideo(false);
     setPlayer(null);
-    if (!show) return;
-    if (isTrailerOpen) return;
+  }, [show?._id, show?.id, isTrailerOpen]);
+
+  // Set up delay timer to display trailer in background (only when in view and not already started)
+  useEffect(() => {
+    if (!show || isTrailerOpen) return;
+    if (showVideo) return; // Video already active; keep playing and do not restart
+    if (!inView) return; // Do not start while scrolled out of view
 
     const trailer = show.videos?.results?.find(vid => vid.site === 'YouTube' && vid.type === 'Trailer') || show.videos?.results?.[0];
     if (!trailer) return;
@@ -109,7 +120,46 @@ const TvDetails = () => {
     }, 4000); // 4-second delay
 
     return () => clearTimeout(timer);
-  }, [show, isTrailerOpen]);
+  }, [show?._id, show?.id, isTrailerOpen, inView, showVideo]);
+
+  const [modalTrailerActive, setModalTrailerActive] = useState(false);
+
+  // Listen to modal trailer events across the app to pause details background video
+  useEffect(() => {
+    const handleModalTrailer = (e) => {
+      setModalTrailerActive(!!e.detail?.playing);
+    };
+    window.addEventListener('modal-trailer-playing', handleModalTrailer);
+    return () => window.removeEventListener('modal-trailer-playing', handleModalTrailer);
+  }, []);
+
+  // Pause trailer when scrolled out of view OR when trailer modal is open, resume when back in view
+  useEffect(() => {
+    const iframe = document.getElementById('details-youtube-player');
+    const shouldPause = !inView || isTrailerOpen || modalTrailerActive;
+
+    if (shouldPause) {
+      if (player && typeof player.pauseVideo === 'function') {
+        try { player.pauseVideo(); } catch (e) {}
+      }
+      if (iframe?.contentWindow) {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: '' }), '*');
+        } catch (e) {}
+      }
+    } else {
+      if (showVideo) {
+        if (player && typeof player.playVideo === 'function') {
+          try { player.playVideo(); } catch (e) {}
+        }
+        if (iframe?.contentWindow) {
+          try {
+            iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: '' }), '*');
+          } catch (e) {}
+        }
+      }
+    }
+  }, [inView, isTrailerOpen, modalTrailerActive, player, showVideo]);
 
   // Initialize YT Player instance when iframe is mounted
   useEffect(() => {
@@ -444,7 +494,7 @@ const TvDetails = () => {
       </div>
 
       {/* Hero Banner Area */}
-      <div className="relative h-[70vh] md:h-[85vh] w-full overflow-hidden flex items-center justify-center">
+      <div ref={heroRef} className="relative h-[70vh] md:h-[85vh] w-full overflow-hidden flex items-center justify-center">
         <AnimatePresence mode="wait">
           <motion.div 
             key={show.id}

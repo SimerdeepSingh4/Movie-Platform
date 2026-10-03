@@ -27,6 +27,8 @@ function Carousel({
   ...props
 }) {
   const [carouselRef, api] = useEmblaCarousel({
+    align: "start",
+    slidesToScroll: "auto",
     ...opts,
     axis: orientation === "horizontal" ? "x" : "y",
   }, plugins)
@@ -67,9 +69,13 @@ function Carousel({
     onSelect(api)
     api.on("reInit", onSelect)
     api.on("select", onSelect)
+    api.on("scroll", onSelect)
+    api.on("settle", onSelect)
 
     return () => {
       api?.off("select", onSelect)
+      api?.off("scroll", onSelect)
+      api?.off("settle", onSelect)
     };
   }, [api, onSelect])
 
@@ -149,6 +155,27 @@ function CarouselPrevious({
 }) {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
+  // JioHotstar edge gradient paddle style
+  if (variant === "edge") {
+    if (!canScrollPrev) return null
+
+    return (
+      <button
+        type="button"
+        data-slot="carousel-previous"
+        aria-label="Previous slide"
+        onClick={scrollPrev}
+        className={cn(
+          "hidden md:flex absolute top-0 bottom-0 left-0 z-30 w-16 sm:w-20 items-center justify-start pl-2 sm:pl-3 bg-gradient-to-r from-black/90 via-black/40 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 cursor-pointer focus:outline-none pointer-events-none group-hover/row:pointer-events-auto",
+          className
+        )}
+        {...props}
+      >
+        <ChevronLeftIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] transition-transform duration-200 hover:scale-125" />
+      </button>
+    )
+  }
+
   return (
     <Button
       data-slot="carousel-previous"
@@ -173,6 +200,27 @@ function CarouselNext({
   ...props
 }) {
   const { orientation, scrollNext, canScrollNext } = useCarousel()
+
+  // JioHotstar edge gradient paddle style
+  if (variant === "edge") {
+    if (!canScrollNext) return null
+
+    return (
+      <button
+        type="button"
+        data-slot="carousel-next"
+        aria-label="Next slide"
+        onClick={scrollNext}
+        className={cn(
+          "hidden md:flex absolute top-0 bottom-0 right-0 z-30 w-16 sm:w-20 items-center justify-end pr-2 sm:pr-3 bg-gradient-to-l from-black/90 via-black/40 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 cursor-pointer focus:outline-none pointer-events-none group-hover/row:pointer-events-auto",
+          className
+        )}
+        {...props}
+      >
+        <ChevronRightIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] transition-transform duration-200 hover:scale-125" />
+      </button>
+    )
+  }
 
   return (
     <Button
