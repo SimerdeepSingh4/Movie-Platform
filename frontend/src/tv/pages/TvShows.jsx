@@ -101,6 +101,9 @@ const TvShows = () => {
         endpoint = `${BASE_URL}/tv/top_rated?api_key=${TMDB_API_KEY}&page=${pageNum}`;
       } else if (category === 'popular') {
         endpoint = `${BASE_URL}/tv/popular?api_key=${TMDB_API_KEY}&page=${pageNum}`;
+      } else if (category === 'trending_india') {
+        const recentDate = new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0];
+        endpoint = `${BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&with_origin_country=IN&first_air_date.gte=${recentDate}&sort_by=popularity.desc&page=${pageNum}`;
       } else {
         endpoint = `${BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&page=${pageNum}&sort_by=popularity.desc`;
         if (genreId) endpoint += `&with_genres=${genreId}`;

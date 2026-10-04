@@ -4,6 +4,7 @@ import axios from 'axios';
 import api from '@/lib/api';
 import HeroSection from '../components/HeroSection';
 import MovieRow from '../components/MovieRow';
+import Top10Row from '../components/Top10Row';
 import { setMovies, setLoading, setError } from '../../store/movieSlice';
 import { toast } from 'sonner';
 
@@ -15,7 +16,9 @@ const Home = () => {
   const {
     trending, popular, topRated,
     trendingTV, popularTV, topRatedTV,
-    trendingIndia,
+    top10MoviesIndia,
+    top10SeriesIndia,
+    trendingWorldwide,
     exclusive,
     netflix, prime, action, comedy, horror, scifi, anime,
     loading, error
@@ -25,6 +28,8 @@ const Home = () => {
     const fetchMovies = async () => {
       dispatch(setLoading(true));
       try {
+        const recentCutoffDate = new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0];
+
         const results = await Promise.allSettled([
           axios.get(`${BASE_URL}/trending/movie/day?api_key=${TMDB_API_KEY}&page=1`),
           axios.get(`${BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=1`),
@@ -32,14 +37,18 @@ const Home = () => {
           axios.get(`${BASE_URL}/trending/tv/day?api_key=${TMDB_API_KEY}&page=1`),
           axios.get(`${BASE_URL}/tv/popular?api_key=${TMDB_API_KEY}&page=1`),
           axios.get(`${BASE_URL}/tv/top_rated?api_key=${TMDB_API_KEY}&page=1`),
-          axios.get(`${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&region=IN&with_original_language=hi|te|ta|kn|ml|pa|bn&primary_release_date.gte=${new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0]}&sort_by=popularity.desc&page=1`),
+          axios.get(`${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&with_origin_country=IN&primary_release_date.gte=${recentCutoffDate}&sort_by=popularity.desc&page=1`),
+          axios.get(`${BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&with_origin_country=IN&first_air_date.gte=${recentCutoffDate}&sort_by=popularity.desc&page=1`),
+          axios.get(`${BASE_URL}/trending/all/day?api_key=${TMDB_API_KEY}&page=1`),
           api.get('/movies')
         ]);
 
         const [
           trendingRes, popularRes, topRatedRes,
           trendingTVRes, popularTVRes, topRatedTVRes,
-          trendingIndiaRes,
+          top10MoviesIndiaRes,
+          top10SeriesIndiaRes,
+          trendingWorldwideRes,
           exclusiveRes
         ] = results;
 
@@ -51,7 +60,9 @@ const Home = () => {
         if (popularTVRes.status === 'fulfilled') dispatch(setMovies({ category: 'popularTV', data: popularTVRes.value.data.results.map(t => ({ ...t, mediaType: 'tv' })) }));
         if (topRatedTVRes.status === 'fulfilled') dispatch(setMovies({ category: 'topRatedTV', data: topRatedTVRes.value.data.results.map(t => ({ ...t, mediaType: 'tv' })) }));
 
-        if (trendingIndiaRes.status === 'fulfilled') dispatch(setMovies({ category: 'trendingIndia', data: trendingIndiaRes.value.data.results.map(m => ({ ...m, mediaType: 'movie' })) }));
+        if (top10MoviesIndiaRes.status === 'fulfilled') dispatch(setMovies({ category: 'top10MoviesIndia', data: top10MoviesIndiaRes.value.data.results.map(m => ({ ...m, mediaType: 'movie' })) }));
+        if (top10SeriesIndiaRes.status === 'fulfilled') dispatch(setMovies({ category: 'top10SeriesIndia', data: top10SeriesIndiaRes.value.data.results.map(t => ({ ...t, mediaType: 'tv' })) }));
+        if (trendingWorldwideRes.status === 'fulfilled') dispatch(setMovies({ category: 'trendingWorldwide', data: trendingWorldwideRes.value.data.results.map(item => ({ ...item, mediaType: item.media_type || (item.title ? 'movie' : 'tv') })) }));
 
         if (exclusiveRes.status === 'fulfilled') dispatch(setMovies({ category: 'exclusive', data: (exclusiveRes.value.data.movies || []).map(m => ({ ...m, mediaType: 'movie' })) }));
 
@@ -162,20 +173,23 @@ const Home = () => {
 
         {(!loading || trending.length > 0) && !error && (
           <>
+            {/* Top 10 Movies Today in India */}
+            <Top10Row
+              title="Top 10 Movies Today in India"
+              movies={top10MoviesIndia}
+              explorePath="/movies?category=trending_india"
+              mediaType="movie"
+            />
+
             {exclusive && exclusive.length > 0 && (
               <MovieRow title="Exclusive Originals" movies={exclusive} explorePath="/movies?category=exclusive" />
             )}
 
-            <MovieRow
-              title="Weekly Top Trending"
-              movies={trending}
-              explorePath="/movies?category=trending"
-            />
-
-            <MovieRow
-              title="Binge-worthy Series"
-              movies={trendingTV}
-              explorePath="/tv?category=trending"
+            {/* Top 10 Series Today in India */}
+            <Top10Row
+              title="Top 10 Series Today in India"
+              movies={top10SeriesIndia}
+              explorePath="/tv?category=trending_india"
               mediaType="tv"
             />
 
@@ -187,10 +201,9 @@ const Home = () => {
             />
 
             <MovieRow
-              title="Trending in India"
-              movies={trendingIndia}
-              explorePath="/movies?category=trending_india"
-              mediaType="movie"
+              title="Trending Worldwide"
+              movies={trendingWorldwide}
+              explorePath="/movies?category=trending"
             />
 
             <MovieRow
